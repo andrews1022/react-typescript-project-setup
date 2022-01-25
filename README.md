@@ -1,6 +1,6 @@
 # React, Styled Components & TypeScript Setup
 
-This is my personal setup approach for generating a project using the above technologies
+This is my personal approach for generating a project using React, Styled Components & TypeScript.
 
 1. Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
 2. Createa a react-typescript boilerplate project using CRA: `npx create-react-app . --template typescript`
