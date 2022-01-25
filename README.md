@@ -16,10 +16,10 @@ import ReactDOM from 'react-dom';
 import App from './App';
 
 ReactDOM.render(
-	<React.StrictMode>
-		<App />
-	</React.StrictMode>,
-	document.getElementById('root')
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
 );
 ```
 
@@ -29,9 +29,9 @@ ReactDOM.render(
 import React from 'react';
 
 const App = () => (
-	<div>
-		<h1>Hello from App.tsx!</h1>
-	</div>
+  <div>
+    <h1>Hello from App.tsx!</h1>
+  </div>
 );
 
 export default App;
