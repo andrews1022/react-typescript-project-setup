@@ -227,6 +227,8 @@ const GlobalStyle = createGlobalStyle`
     zoom: 1;
   }
 `;
+
+export default GlobalStyle;
 ```
 
 16. Go back to `index.tsx` in `src` and update the code to look like this:
