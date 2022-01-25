@@ -151,7 +151,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    /* font-family: ${fonts.myFontFamilyHere}; */
+    /* add custom font-family here */
     line-height: 1;
   }
 
@@ -169,7 +169,7 @@ const GlobalStyle = createGlobalStyle`
   button,
   input,
   textarea {
-    /* font-family: ${fonts.myFontFamilyHere}; */
+    /* add custom font-family here */
   }
 
   img,
