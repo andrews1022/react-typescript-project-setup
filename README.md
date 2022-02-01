@@ -8,7 +8,7 @@ This is my personal approach for generating a project using React, Styled Compon
 4. Go into the `src` folder: `cd src`
 5. Cleanup unnecessary files: `rm App.css App.test.tsx index.css logo.svg reportWebVitals.ts setupTests.ts`
 6. Go into the `public` folder: `cd public`
-7. Cleanup unnecessary files: `rm favicon.ico logo192.png logo512.png manifest.json`
+7. Cleanup unnecessary files: `rm logo192.png logo512.png manifest.json`
 8. All that should be left are `App.tsx`, `index.tsx`, and `react-app-env.d.ts`
 9. Copy and paste this code into `index.tsx`:
 
