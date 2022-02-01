@@ -5,10 +5,12 @@ This is my personal approach for generating a project using React, Styled Compon
 1. Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
 2. Createa a react-typescript boilerplate project using CRA: `npx create-react-app . --template typescript`
 3. After downloading, install `styled-components` packages: `npm i styled-components @types/styled-components`
-4. Go into the src folder: `cd src`
+4. Go into the `src` folder: `cd src`
 5. Cleanup unnecessary files: `rm App.css App.test.tsx index.css logo.svg reportWebVitals.ts setupTests.ts`
-6. All that should be left are `App.tsx`, `index.tsx`, and `react-app-env.d.ts`
-7. Copy and paste this code into `index.tsx`:
+6. Go into the `public` folder: `cd public`
+7. Cleanup unnecessary files: `rm favicon.ico logo192.png logo512.png manifest.json`
+8. All that should be left are `App.tsx`, `index.tsx`, and `react-app-env.d.ts`
+9. Copy and paste this code into `index.tsx`:
 
 ```
 import React from 'react';
@@ -23,7 +25,7 @@ ReactDOM.render(
 );
 ```
 
-8. Copy and paste this code into `App.tsx`:
+10. Copy and paste this code into `App.tsx`:
 
 ```
 import React from 'react';
@@ -38,7 +40,7 @@ export default App;
 
 ```
 
-9. Add ESLint: `npx eslint --init`
+11. Add ESLint: `npx eslint --init`
 
 - Go through and answer the questions accordingly
 - Pick `JSON` for the file format
@@ -46,7 +48,7 @@ export default App;
 - Run `npm audit fix` if prompted
 - Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
 
-10. In the `src` folder, create the following folders (at least):
+12. In the `src` folder, create the following folders (at least):
 
 - `components`
 - `styles`
@@ -54,8 +56,8 @@ export default App;
 
 Run the command: `mkdir components styles types`
 
-11. Go into the `styles` folder: `cd styles`
-12. In the `styles` folder, create the following 3 files:
+13. Go into the `styles` folder: `cd styles`
+14. In the `styles` folder, create the following 3 files:
 
 - `GlobalStyle.ts` (for global styling)
 - `lib.ts` (for shared styling)
@@ -63,7 +65,7 @@ Run the command: `mkdir components styles types`
 
 Run the command: `touch GlobalStyle.ts lib.ts theme.ts`
 
-13. Copy and paste this code into `lib.ts`:
+15. Copy and paste this code into `lib.ts`:
 
 ```
 // a library of re-usable styled components / base styles to be used anywhere in the project
@@ -71,7 +73,7 @@ Run the command: `touch GlobalStyle.ts lib.ts theme.ts`
 import styled, { css } from "styled-components";
 ```
 
-14. Copy and paste this code into `theme.ts`:
+16. Copy and paste this code into `theme.ts`:
 
 ```
 const theme = {
@@ -131,7 +133,7 @@ const theme = {
 export default theme;
 ```
 
-15. Copy and paste this code into `GlobalStyle.ts`:
+17. Copy and paste this code into `GlobalStyle.ts`:
 
 ```
 import { createGlobalStyle } from "styled-components";
@@ -231,7 +233,7 @@ const GlobalStyle = createGlobalStyle`
 export default GlobalStyle;
 ```
 
-16. Go back to `index.tsx` in `src` and update the code to look like this:
+18. Go back to `index.tsx` in `src` and update the code to look like this:
 
 ```
 import React from 'react';
