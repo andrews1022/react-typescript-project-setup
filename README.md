@@ -4,7 +4,7 @@ This is my personal approach for generating a project using React, Styled Compon
 
 1. Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
 2. Createa a react-typescript boilerplate project using CRA: `npx create-react-app . --template typescript`
-3. After downloading, install `styled-components` packages: `npm i styled-components @styled-components`
+3. After downloading, install `styled-components` packages: `npm i styled-components @types/styled-components`
 4. Go into the src folder: `cd src`
 5. Cleanup unnecessary files: `rm App.css App.test.tsx index.css logo.svg reportWebVitals.ts setupTests.ts`
 6. All that should be left are `App.tsx`, `index.tsx`, and `react-app-env.d.ts`
