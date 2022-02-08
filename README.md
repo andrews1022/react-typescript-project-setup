@@ -13,14 +13,14 @@ This is my personal approach for generating a project using React, Styled Compon
 9. Copy and paste this code into `index.tsx`:
 
 ```
-import React from 'react';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
 ReactDOM.render(
-  <React.StrictMode>
+  <StrictMode>
     <App />
-  </React.StrictMode>,
+  </StrictMode>,
   document.getElementById('root')
 );
 ```
@@ -236,25 +236,25 @@ export default GlobalStyle;
 18. Go back to `index.tsx` in `src` and update the code to look like this:
 
 ```
-import React from 'react';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
-import { ThemeProvider } from 'styled-components';
-
-// components
-import App from './App';
 
 // styled components
+import { ThemeProvider } from 'styled-components';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
 
+// components
+import App from './components/App';
+
 ReactDOM.render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <GlobalStyle />
-      <App />
-    </ThemeProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
+	<StrictMode>
+		<ThemeProvider theme={theme}>
+			<GlobalStyle />
+			<App />
+		</ThemeProvider>
+	</StrictMode>,
+	document.getElementById('root')
 );
 ```
 
