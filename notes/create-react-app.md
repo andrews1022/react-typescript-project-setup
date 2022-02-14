@@ -151,7 +151,7 @@ import { createGlobalStyle } from "styled-components";
 import theme from "./theme";
 
 // destructured theme properties
-const { colors, fontSizes, fontWeights, fonts, greys, mediaQueries, shades, spacing } = theme;
+const { mediaQueries } = theme;
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -294,3 +294,17 @@ ReactDOM.render(
 
 - Update the README (remove CRA related content)
 - Commit this progress: `git add . && git commit -m 'updated readme' && git push -u origin main`
+
+- Setup Netlify continuous integration with GitHub
+  - At the root level of the project, install the Netlify CLI: `npm i netlify-cli`
+  - Authenticate and obtain an access token `npx netlify login`
+  - Init a new Netlify site: `npx netlify init`
+    - Select `Create & configure a new site`
+    - Select your team
+    - Give the site a name (or leave blank, can be renamed later)
+    - Choose `Authorize with GitHub through app.netlify.com`
+      - Click Authorize where needed
+    - Set your build command to: `npm run build`
+    - Set your build directory to: `build`
+    - Leave Netlify functions blank (just hit `Enter`)
+    - Select `n` to not add the `netlify.toml` file
