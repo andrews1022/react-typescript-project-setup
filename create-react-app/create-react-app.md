@@ -5,6 +5,7 @@ This is my personal approach for generating a project using React, Styled Compon
 ## GitHub Setup
 
 - Create a new repo on GitHub [here](https://github.com/new)
+  - Give it at least a name, then click `Create repository`
   - Keep this tab open for all the git commands
 - Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
 - Create a react-typescript boilerplate project using CRA: `npx create-react-app . --template typescript`
