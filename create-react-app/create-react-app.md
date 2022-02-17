@@ -9,10 +9,11 @@ This is my personal approach for generating a project using React, Styled Compon
   - Keep this tab open for all the git commands
 - Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
 - Create a react-typescript boilerplate project using CRA: `npx create-react-app . --template typescript`
+- Open in VS Code: `code .`
 - Remove git from this project (to start from scratch): `rm -rf .git`
 - Run all the git commands as outlined on the repo page
   - Here it is in one command:
-    `git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/andrews1022/PROJECT_NAME.git && git push -u origin main`
+    `git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/USERNAME/PROJECT_NAME.git && git push -u origin main`
 
 ## Netlify Setup
 
