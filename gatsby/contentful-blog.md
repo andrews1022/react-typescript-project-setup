@@ -69,6 +69,36 @@ This document covers how you can start with the Contentful Blog Gatsby Starter a
 - Click `Build site`
   - The build can take a few minutes, so you will have to wait!
 
+## Testing the Workflow Pt. 1 - Simple Code Change
+
+Let's test our workflow by making a simple change in the code. This will prove that whenever we make a commit / push to GitHub, it will automatically trigger a re-build of the site on Gatsby Cloud.
+
+- In VS Code, go to `/src/components/article-preview.js`
+- Find this piece of JSX: `<h2 className={styles.title}>{post.title}</h2>`
+- Simply add on a few exclaimation points after `{post.title}`: `<h2 className={styles.title}>{post.title}!!</h2>`
+- Commit the change: `git add . && git commit -m 'quick commit for testing workflow' && git push -u origin main`
+- Go to your Gatsby Dashboard
+  - This should've triggered a re-build of the site
+  - You might need to just refresh the page
+
+## Testing the Workflow Pt. 2 - Simple Contentful Change
+
+Let's test our workflow some more by making a simple change in the Contentful backend. The setup script created some starter models and content for us, so we will make a simple change to the Person content "John Doe". This will prove that whenever we make a change in Contentful, it will automatically trigger a re-build of the site on Gatsby Cloud.
+
+- Go to the Contentful Space
+- Go to the Content tab, and click on the John Doe piece of Content
+- Make a simple change, like to the name
+- Go to your Gatsby Dashboard
+  - The build time for this is typically VERY quick, ~3-4 seconds
+  - You should see the change on the site
+
+So, at this point, we have confirmed whenever we either:
+
+- A) Make a change in the code and commit / push to GitHub
+- B) Make a change in the Contentful backend
+
+Gatsby Cloud will automatically trigger a re-build of the site, keeping it up-to-date at all times.
+
 ## Styled Components Setup
 
 - To use ThemeProvider, wrap `Layout.tsx` like so:
