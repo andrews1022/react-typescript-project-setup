@@ -165,19 +165,37 @@ Lastly, I will group each component and it's CSS module file together in a folde
 /components
   /ArticlePreview
     - index.js
-    - styles.css
+    - article-preview.module.css
   /Container
     - index.js
   /Footer
     - index.js
-    - styles.css
+    - footer.module.css
   etc.
 
 ```
 
 Again, this is just my personal approach that I've always used. Totally up to you how you want to organize things.
 
-So, let's get started!
+Later on when we setup Styled Components, we will replace each `*.module.css` file with a `styles.ts` file. This file will house any styled components used by the functional component in the same folder. So, the structure then will be:
+
+```
+/components
+  /ArticlePreview
+    - index.tsx
+    - styles.ts
+  /Container
+    - index.tsx
+  /Footer
+    - index.tsx
+    - styles.ts
+  etc.
+
+```
+
+So, I will not bother renaming the CSS module files since they will be replaced anyways.
+
+Alright, let's get started!
 
 ### Layout.js
 
@@ -432,6 +450,8 @@ const BlogPostTemplate = ({ data, location }) => {
 };
 ```
 
+### Uninstalling Some NPM Packages
+
 At this point, we are no longer using `lodash`. In fact, we are no longer using any of the following packages:
 
 - `contentful-import`
@@ -440,6 +460,31 @@ At this point, we are no longer using `lodash`. In fact, we are no longer using 
 - `netlify-cli`
 
 So, stop the local development server (Ctrl + C), and then we can uninstall them all by running `npm un contentful-import gh-pages lodash netlify-cli`.
+
+### Organizing Components Into Folders
+
+First, go into the components folder: `cd src/components/`
+
+Next, we need to create all folders for each component:
+
+- ArticlePreview
+- Container
+- Footer
+- Hero
+- Layout
+- Navigation
+- Seo
+- Tags
+
+We can create them all at once by running: `mkdir ArticlePreview Container Footer Hero Layout Navigation Seo Tags`
+
+Now, one at a time, move the corresponding files into their folders. Hopefully VS Code automatically updates the import path(s) for you. If not, you will have to manually update them yourself.
+
+After moving everything around, you should see the following warning: `warn chunk commons [mini-css-extract-plugin]`
+
+This error/warning is caused by the Webpack plugin mini-css-extract-plugin wanting all CSS imports to be in the same order. This is because it confused CSS modules with plain CSS.
+
+However, since we will be using Styled Components, we can ignore this warning and continue. If you wish to continue using CSS Modules, simply google `warn chunk commons mini-css-extract-plugin gatsby` and you will find plenty of results on troubleshooting the warning.
 
 ## Styled Components Setup
 
