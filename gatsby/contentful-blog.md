@@ -1,6 +1,6 @@
 # Gatsby Starter - Contentful Blog
 
-This document covers how you can start with the Contentful Blog Gatsby Starter and update it to:
+This document covers how you can start with the [Contentful Blog Gatsby Starter](https://github.com/contentful/starter-gatsby-blog) and update it to:
 
 - Use TypeScript
 - Use Styled Components
@@ -139,6 +139,10 @@ After some testing, here is a list of the files folders we can & cannot deleted 
 You may remove the files / folders marked with a '✓' as you wish.
 
 After that, let's do a quick restart/rebuild of the local server to make sure everything is still running ok: `rm -rf .cache public && npm run dev`
+
+You should also add that command to your scripts in package.json, as it does come in handy: `"rebuild": "rm -rf .cache public && npm run dev"`
+
+As well as this one: `"troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"`
 
 At this point, I personally encountered a git error along the lines of `Fatal unable to access, could not resolve host` when trying to commit changes. If this happens, it's likely a proxy issue. Simply run this command and it should fix the problem:
 
@@ -459,7 +463,20 @@ At this point, we are no longer using `lodash`. In fact, we are no longer using 
 - `lodash`
 - `netlify-cli`
 
-So, stop the local development server (Ctrl + C), and then we can uninstall them all by running `npm un contentful-import gh-pages lodash netlify-cli`.
+So, stop the local development server (`Ctrl + C`), and then we can uninstall them all by running: `npm un contentful-import gh-pages lodash netlify-cli`.
+
+We can also simply our `scripts` in `package.json` to:
+
+```
+"scripts": {
+  "build": "gatsby build",
+  "clean": "gatsby clean",
+  "dev": "gatsby develop",
+  "rebuild": "rm -rf .cache public && npm run dev",
+  "serve": "gatsby serve",
+  "troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"
+}
+```
 
 ### Organizing Components Into Folders
 
@@ -485,6 +502,238 @@ After moving everything around, you should see the following warning: `warn chun
 This error/warning is caused by the Webpack plugin mini-css-extract-plugin wanting all CSS imports to be in the same order. This is because it confused CSS modules with plain CSS.
 
 However, since we will be using Styled Components, we can ignore this warning and continue. If you wish to continue using CSS Modules, simply google `warn chunk commons mini-css-extract-plugin gatsby` and you will find plenty of results on troubleshooting the warning.
+
+## Converting to TypeScript
+
+Now comes a BIG step: converting everything to TypeScript! We will convert all components, pages, and even the Gatsby API files (gatsby-config, gatsby-node, etc.) at the root level to use TypeScript.
+
+Gatsby claims to support TypeScript out of the box. That is partially true. If we create a simple Copy component:
+
+```
+const Copy = () => (
+	<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, nesciunt?</p>
+);
+```
+
+And use it in ArticlePreview above the tags, it will work just fine. However, we don't get proper type checking. VS Code will highlight the error, but Gatsby CLI will not.
+
+Here is a summary of the steps we will take:
+
+- Install all the necessary packages
+- Setup tsconfig.json
+- Convert all the components & pages to TypeScript
+- Convert the Gatsby API files to use TypeScript
+
+<!--
+  Packages installed:
+  - concurrently
+  - typescript
+
+  Type packages:
+  - @types/react-helmet
+-->
+
+Starting off:
+
+- First start by installing typescript: `npm i typescript`
+- Create a tsconfig file: `tsc --init`
+- Select everything in tsconfig.json, and replace it with this:
+
+```
+{
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react",
+		"module": "commonjs",
+		"noEmit": true,
+		"pretty": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "es5"
+	},
+	"include": ["./src", "gatsby"],
+	"exclude": ["./node_modules", "./public", "./.cache"]
+}
+```
+
+Next, we need to install `concurrently` which will also to run multiple scripts, well, concurrently: `npm i concurrently`
+
+Next, we need to update our `scripts` in `package.json`:
+
+```
+"dev-gatsby": "gatsby develop",
+"dev-typescript": "tsc -w",
+"dev": "concurrently \"npm:dev-gatsby\" \"npm:dev-typescript\"",
+```
+
+At this point, we should run our rebuild script to start fresh: `npm run rebuild`
+
+Now we will also see any type errors in the CLI!
+
+### Pages
+
+Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home Page.
+
+- Rename from `index.js` to `index.tsx`
+- When you do that, the TypeScript will complain about a few things:
+
+  - The components you are importing (which we will convert to `.tsx` in a bit anyways, so no worries there)
+  - The props `data` & `location` have the any type implicitly
+  - The types for `allContentfulBlogPost` & `allContentfulPerson` are also unknown
+  - A type error for the CSS Modules (since we are replacing them with Styled Components later on, no worries here either)
+
+- Luckily, Gatsby has types for us, and the one we need for pages is `PageProps`
+  - Import it: `import type { PageProps } from 'gatsby'`
+  - Then set the type of our destructured props to it:
+  ```
+  const Home = ({ data, location }: PageProps) => {
+    // ...
+  };
+  ```
+- Next, we'll tackle the types for the GraphQL data
+
+  - Outside the function body, just above, create a new type called `GraphQLResult`: `type GraphQLResult = {};`
+  - In this, we need to set the types for the data being returned
+  - Now would be a good time to create a `types` folder, and inside it a file called `types.ts`
+    - At the top, import the following: `import type { IGatsbyImageData } from 'gatsby-plugin-image';`
+      - We will use this multiple times in this file, and we would get type errors in some files if we didn't
+  - In `types.ts`, add the following:
+
+  ```
+  export type BlogPost = {
+    title: string;
+    slug: string;
+    publishDate: string;
+    tags: string[];
+    heroImage: {
+      gatsbyImageData: IGatsbyImageData;
+    };
+    description: {
+      childMarkdownRemark: {
+        html: string;
+      };
+    };
+  };
+
+  export type Person = {
+    name: string;
+    shortBio: {
+      shortBio: string;
+    };
+    title: string;
+    heroImage: {
+      gatsbyImageData: IGatsbyImageData;
+    };
+  };
+  ```
+
+  - These will be our re-usable types throughout the project
+  - Back in the `index.tsx`, adjust the `GraphQLResult` type to:
+
+  ```
+  type GraphQLResult = {
+    allContentfulBlogPost: {
+      nodes: BlogPost[];
+    };
+    allContentfulPerson: {
+      nodes: Person[];
+    };
+  };
+  ```
+
+  - Now, we can pass this type in as an additional argument to PageProps:
+
+  ```
+  const Home = ({ data, location }: PageProps<GraphQLResult>) => {
+    // ...
+  };
+  ```
+
+  - And now the type errors for the Contentful data should be gone!
+
+- Repeat this process for `blog.js`
+
+- For the `blog-post.js` template, however:
+
+  - After renaming to `.tsx`, you will get error saying `Module not found`
+  - This is because in `gatsby-node.js`, there is this line: `const blogPost = path.resolve('./src/templates/blog-post.js');`
+    - Simply change it to `.tsx` at the end
+    - Ctrl + C to stop the local dev server (if not already stopped)
+    - Start fresh with `npm run rebuild`
+  - In `types.ts`, add the following:
+
+  ```
+  export type SingleBlogPost = {
+    author: {
+      name: string;
+    };
+    body: {
+      childMarkdownRemark: {
+        html: string;
+        timeToRead: number;
+      };
+    };
+    description: {
+      childMarkdownRemark: {
+        excerpt: string;
+      };
+    };
+    heroImage: {
+      gatsbyImageData: IGatsbyImageData;
+      resize: {
+        src: string;
+      };
+    };
+    publishDate: string;
+    rawDate: string;
+    slug: string;
+    tags: string[];
+    title: string;
+  };
+
+  export type NextPrevious = { slug: string; title: string } | null;
+  ```
+
+  - Back in the `blog-post.tsx`, adjust the `GraphQLResult` type to:
+
+  ```
+  type GraphQLResult = {
+    contentfulBlogPost: SingleBlogPost;
+    next: NextPrevious;
+    previous: NextPrevious;
+  };
+  ```
+
+  - Then pass it to `PageProps`:
+
+  ```
+  const BlogPostTemplate = ({ data, location }: PageProps<GraphQLResult>) => {
+    // ...
+  };
+  ```
+
+### Components
+
+Now let's update the components to .tsx! The steps are similar to the pages:
+
+- Rename `index.js` to `index.tsx`
+- Setup type for the props (if any)
+
+  - Example:
+
+  ```
+  // props
+  type ArticlePreviewProps = {
+    posts: BlogPost[];
+  };
+
+  const ArticlePreview = ({ posts }: ArticlePreviewProps) => {
+    // ...
+  };
+  ```
+
+- If you are having trouble/unsure how to type the pre-existing components, you can see how I did so [here](https://github.com/andrews1022/gatsby-contentful-blog/tree/main/src/components).
 
 ## Styled Components Setup
 
