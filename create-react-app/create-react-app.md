@@ -1,36 +1,34 @@
 # Create React App
 
-This is my personal approach for generating a project using React, Styled Components & TypeScript using Create React App.
+This is my personal approach for generating a project using React, TypeScript, & Styled Components using Create React App.
 
 ## GitHub Setup
 
 - Create a new repo on GitHub [here](https://github.com/new)
   - Give it at least a name, then click `Create repository`
-  - Keep this tab open for all the git commands
-- Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
-- Create a react-typescript boilerplate project using CRA: `npx create-react-app . --template typescript`
-- Open in VS Code: `code .`
-- Remove git from this project (to start from scratch): `rm -rf .git`
+  - Keep this tab open
+- On your local machine, create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
+- Download & install the Create React App TypeScript Template: `npx create-react-app . --template typescript`
+- After that is done, open it in VS Code: `code .`
+- Remove git from this project (so we can start from scratch): `rm -rf .git`
 - Run all the git commands as outlined on the repo page
   - Here it is in one command:
-    `git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/USERNAME/PROJECT_NAME.git && git push -u origin main`
+    `git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main`
 
 ## Netlify Setup
 
 - At the root level of the project, install the Netlify CLI: `npm i netlify-cli`
-- Authenticate and obtain an access token `npx netlify login`
+- Authenticate and obtain an access token by running: `npx netlify login`
 - Init a new Netlify site: `npx netlify init`
-
   - Select `Create & configure a new site`
   - Select your team
-  - Give the site a name (or leave blank, can be renamed later)
+  - Give the site a name (or leave blank, as it can always be renamed later)
   - Choose `Authorize with GitHub through app.netlify.com`
     - Click Authorize where needed
   - Set your build command to: `npm run build`
   - Set your build directory to: `build`
   - Leave Netlify functions blank (just hit `Enter`)
   - Select `n` to not add the `netlify.toml` file
-
 - Commit this progress: `git add . && git commit -m 'setup netlify continuous integration' && git push -u origin main`
 
 ## CRA Cleanup
@@ -75,41 +73,35 @@ export default App;
 ## ESLint Setup
 
 - Add ESLint: `npx eslint --init`
-
   - Go through and answer the questions accordingly
   - Pick `JSON` for the file format
   - Download any additional packages if prompted
-  - Run `npm audit fix` if prompted
   - Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
-
 - Commit this progress: `git add . && git commit -m 'added eslint' && git push -u origin main`
 
 ## Styled Components Setup
 
-- Downloading & install Styled Components packages: `npm i styled-components @types/styled-components`
+- Downloading & install the Styled Components packages: `npm i styled-components @types/styled-components`
 - In the `src` folder, create the following folders (at least):
   - `components`
   - `styles`
   - `types`
 - Run the command: `cd src && mkdir components styles types`
-
 - Go into the `styles` folder: `cd styles`
-
   - Create the following 3 files:
     - `GlobalStyle.ts` (for global styling)
     - `lib.ts` (for shared styling)
     - `theme.ts` (for theme)
   - Run the command: `cd styles && touch GlobalStyle.ts lib.ts theme.ts`
-
 - Copy and paste this code into `lib.ts`:
 
 ```
-// a library of re-usable styled components / base styles to be used anywhere in the project
+// a library of reusable styled components / base styles to be used anywhere in the project
 
 import styled, { css } from "styled-components";
 ```
 
-- **NOTE**: This file is sometimes not used, so it can always be deleted later on
+- **NOTE**: `lib.ts` is sometimes left unused, so it can always be deleted later on.
 
 - Copy and paste this code into `theme.ts`:
 
@@ -273,14 +265,9 @@ export default GlobalStyle;
 ## Final Adjustments
 
 - Go to the components folder: `cd .. && cd components`
-
-  - In here, create a new folder for App: `mkdir App`
-
-- Now, move `App.tsx` into this directory and rename it to `index.tsx`:
-
-  - First, `cd` back to the `src` directory
-  - From here, move the file to the App folder and rename it: `mv App.tsx components/App/index.tsx`
-
+  - Here, create a new `App` folder: `mkdir App`
+  - Next, `cd` back to the `src` directory
+  - Now, move `App.tsx` into the `App` directory and rename it to `index.tsx`: `mv App.tsx components/App/index.tsx`
 - Go back to `index.tsx` in `src` and copy and paste this code:
 
 ```
@@ -307,16 +294,12 @@ ReactDOM.render(
 ```
 
 - Go to `index.html` in the `public` folder
-
   - Remove the comments
   - Update the `title` tag
   - Add Google Fonts (or whichever fonts) in here
   - Update `theme.fonts` in `theme.ts`, then update the comment placeholders in `GlobalStyle.ts` with the new font
-
 - Check the project runs ok locally:
-
   - `cd` back to root of the project
   - Run `npm run start`
-
 - Update the README (remove CRA related content)
 - Commit this progress: `git add . && git commit -m 'final setup adjustments' && git push -u origin main`

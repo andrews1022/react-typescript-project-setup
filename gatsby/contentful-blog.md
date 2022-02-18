@@ -507,7 +507,7 @@ However, since we will be using Styled Components, we can ignore this warning an
 
 Now comes a BIG step: converting everything to TypeScript! We will convert all components, pages, and even the Gatsby API files (gatsby-config, gatsby-node, etc.) at the root level to use TypeScript.
 
-Gatsby claims to support TypeScript out of the box. That is partially true. If we create a simple Copy component:
+Gatsby claims to support TypeScript out of the box. This is partially true. If we create a simple Copy component:
 
 ```
 const Copy = () => (
@@ -515,7 +515,7 @@ const Copy = () => (
 );
 ```
 
-And use it in ArticlePreview above the tags, it will work just fine. However, we don't get proper type checking. VS Code will highlight the error, but Gatsby CLI will not.
+And use it in `ArticlePreview` above the tags, for example, it will work just fine. However, we don't get proper type checking. VS Code will highlight the error, but the Gatsby CLI will not.
 
 Here is a summary of the steps we will take:
 
@@ -530,6 +530,9 @@ Here is a summary of the steps we will take:
   - typescript
 
   Type packages:
+  - @types/node
+  - @types/react
+  - @types/react-dom
   - @types/react-helmet
 -->
 
@@ -734,6 +737,22 @@ Now let's update the components to .tsx! The steps are similar to the pages:
   ```
 
 - If you are having trouble/unsure how to type the pre-existing components, you can see how I did so [here](https://github.com/andrews1022/gatsby-contentful-blog/tree/main/src/components).
+
+## ESLint Setup
+
+- Start by running: `npx eslint --init`
+- This is how I answer the questions:
+  - How would you like to use ESLint? · `style`
+  - What type of modules does your project use? · `esm`
+  - Which framework does your project use? · `react`
+  - Does your project use TypeScript? · No / `Yes`
+  - Where does your code run? · `browser`, `node`
+  - How would you like to define a style for your project? · `guide`
+  - Which style guide do you want to follow? · `airbnb`
+  - What format do you want your config file to be in? · `JSON`
+- Download any additional packages if prompted
+- Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
+- Commit this progress: `git add . && git commit -m 'added eslint' && git push -u origin main`
 
 ## Styled Components Setup
 
