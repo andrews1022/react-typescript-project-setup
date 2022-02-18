@@ -536,6 +536,8 @@ Here is a summary of the steps we will take:
   - @types/react-helmet
 -->
 
+### Setup
+
 Starting off:
 
 - First start by installing typescript: `npm i typescript`
@@ -574,7 +576,7 @@ At this point, we should run our rebuild script to start fresh: `npm run rebuild
 
 Now we will also see any type errors in the CLI!
 
-### Pages
+### Converting Pages
 
 Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home Page.
 
@@ -716,9 +718,9 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
   };
   ```
 
-### Components
+### Converting Components
 
-Now let's update the components to .tsx! The steps are similar to the pages:
+Now let's update the components to `.tsx`! The steps are similar to the pages:
 
 - Rename `index.js` to `index.tsx`
 - Setup type for the props (if any)
@@ -736,7 +738,10 @@ Now let's update the components to .tsx! The steps are similar to the pages:
   };
   ```
 
+- Fix any other typing errors accordingly
 - If you are having trouble/unsure how to type the pre-existing components, you can see how I did so [here](https://github.com/andrews1022/gatsby-contentful-blog/tree/main/src/components).
+
+### Converting Gatsby API Files
 
 ## ESLint Setup
 
@@ -756,18 +761,176 @@ Now let's update the components to .tsx! The steps are similar to the pages:
 
 ## Styled Components Setup
 
-- To use ThemeProvider, wrap `Layout.tsx` like so:
+### Simple Component Change
+
+- Download & install the following packages: `npm i styled-components @types/styled-components gatsby-plugin-styled-components`
+- Open `gatsby-config.js`:
+  - In the `plugins` array, add this: `'gatsby-plugin-styled-components',`
+  - Start fresh with: `npm run rebuild`
+- Let's make a simple adjustment to `ArticlePreview`
+  - In the ArticlePreview folder, create a file called: `styles.ts`
+  - Import styled-components: `import styled from 'styled-components';`
+  - Open up the CSS modules file
+  - Let's convert .article-list to a styled component
+  - Copy and paste this into styles.ts:
+  ```
+  export const ArticleList = styled.ul`
+    display: grid;
+    grid-gap: 48px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  `;
+  ```
+- Back in index.tsx, add the following:
+
+  ```
+  // styled components
+  import * as S from './styles';
+  ```
+
+  - We use `import * as S` so we can differentiate styled components from our functional components
+  - In the JSX, replace this:
+
+  ```
+  <ul className={styles.articleList}>
+    // ...
+  </ul>
+  ```
+
+  - With this:
+
+  ```
+  <S.ArticleList>
+    // ...
+  </S.ArticleList>
+  ```
+
+  - And if we check the Elements Tab in DevTools, we should see something like:
+
+  ```
+  <ul class="styles__ArticleList-bfmZnV jUEOQo">
+    // ...
+  </ul>
+  ```
+
+  - Of course, the randomly generated class names will be different than from what you see here
+
+### Adding Global Styles
+
+Now, let's add some global styles to the project. For that we will need 2 things:
+
+- GlobalStyle component
+- Theme object
+
+First, let's create the GlobalStyle component:
+
+- Inside the src folder, create a new folder called `styles`
+- In this folder, create a file called: `GlobalStyle.ts`
+- In this file, import createGlobalStyle: `import { createGlobalStyle } from "styled-components";`
+- Next add this starting code:
 
 ```
-return (
-  <div data-is-root-path={isRootPath} onClick={closeGetInTouchPopupOnBodyClick} role="presentation">
-    <ThemeProvider theme={theme}>
-      <GlobalStyle />
-      <Nav isRootPath={isRootPath} location={location} />
-      <GetInTouchPopup reference={popupRef} setToggle={setToggle} toggle={toggle} />
-      <main className="main">{children}</main>
-      <Footer />
-    </ThemeProvider>
-  </div>
-);
+const GlobalStyle = createGlobalStyle``;
+
+export default GlobalStyle;
 ```
+
+- Inside the backticks is where you can place your global styles you want applied. Let's copy and paste some from global.css into there and make the necessary adjustments:
+
+```
+const GlobalStyle = createGlobalStyle`
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 0;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+`;
+```
+
+Next, let's create the global theme object
+
+- Inside the styles folder, create a new file called theme.ts, and added this code to start:
+
+```
+const theme = {
+	mediaQueries: {
+		desktopHD: 'only screen and (max-width: 1920px)',
+		desktopMedium: 'only screen and (max-width: 1680px)',
+		desktopSmall: 'only screen and (max-width: 1440px)',
+		laptop: 'only screen and (max-width: 1366px)',
+		laptopSmall: 'only screen and (max-width: 1280px)',
+		tabletLandscape: 'only screen and (max-width: 1024px)',
+		tabletMedium: 'only screen and (max-width: 900px)',
+		tabletPortrait: 'only screen and (max-width: 768px)',
+		mobileXLarge: 'only screen and (max-width: 640px)',
+		mobileLarge: 'only screen and (max-width: 576px)',
+		mobileMedium: 'only screen and (max-width: 480px)',
+		mobileSmall: 'only screen and (max-width: 415px)',
+		mobileXSmall: 'only screen and (max-width: 375px)',
+		mobileTiny: 'only screen and (max-width: 325px)'
+	},
+	colors: {
+		red: 'red'
+	}
+};
+
+export default theme;
+```
+
+Now, let's use both of them. To do so, open the `Layout` component file (`src/components/Layout/index.tsx`)
+
+- In there, import both of these files, along with `ThemeProvider` from `styled-components`:
+
+```
+// styled components
+import { ThemeProvider } from "styled-components";
+import GlobalStyle from '../../styles/GlobalStyle';
+import theme from '../../styles/theme';
+```
+
+- To use `GlobalStyle`, place it above the Seo component (at the same level
+- To use `ThemeProvider`, replace the fragment with it
+  - At this point, you should get a red underline
+  - This is because ThemeProvider expects a prop called theme
+  - So, we can pass in our theme object as value
+- In the end, the JSX should look like this:
+
+```
+const Layout = ({ children, location }: LayoutProps) => (
+	<ThemeProvider theme={theme}>
+		<GlobalStyle />
+		<Seo title='Gatsby Contentful Blog w/ TypeScript' />
+		<Navigation />
+		<main className='test'>{children}</main>
+		<Footer />
+	</ThemeProvider>
+);
+
+```
+
+## Done!
+
+At this point, we're done all the setup! Whew! That was a lot! Now, it is up to you to build out your project. Some things you can do from here:
+
+- Added custom font (Google Fonts, Adobe Typekit, etc.)
+- Add any more desired plugins/npm packages
+- Convert existing components using CSS modules to Styled components, or just delete them entirely and start from scratch
+- Update GlobalStyle and Theme to your liking
+
+Happy coding!

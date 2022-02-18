@@ -81,7 +81,7 @@ export default App;
 
 ## Styled Components Setup
 
-- Downloading & install the Styled Components packages: `npm i styled-components @types/styled-components`
+- Download & install the following packages: `npm i styled-components @types/styled-components`
 - In the `src` folder, create the following folders (at least):
   - `components`
   - `styles`
