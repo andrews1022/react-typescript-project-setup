@@ -1,11 +1,12 @@
 # Gatsby Starter - Contentful Blog
 
-This document covers how you can start with the [Contentful Blog Gatsby Starter](https://github.com/contentful/starter-gatsby-blog) and update it to:
+This is my personal approach for generating a project using the [Contentful Blog Gatsby Starter](https://github.com/contentful/starter-gatsby-blog) and update it to:
 
 - Use TypeScript
 - Use Styled Components
 - Host on Gatsby Cloud
 - Continuous Integration with GitHub
+- Automatic re-builds on Gatsby Cloud
 
 ## Contentful Setup
 
@@ -14,24 +15,27 @@ This document covers how you can start with the [Contentful Blog Gatsby Starter]
   - Make sure you are on the `Content delivery / preview tokens` tab
   - Click `Add API key` button in the top right corner
   - Give it a name at least, and also description
-  - Click Save
+  - Click `Save`
 
 ## GitHub Setup
 
 - Create a new repo on GitHub [here](https://github.com/new)
   - Give it at least a name, then click `Create repository`
-  - Keep this tab open for all the git commands
-- Create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
+  - Keep this tab open
+- On your local machine, create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
+  - Where `PROJECT_NAME` matches the name of the GitHub repo you just created
 - Download the starter: `npx gatsby new . https://github.com/contentful/starter-gatsby-blog`
-- Open in VS Code: `code .`
+- After that is done, open it in VS Code: `code .`
 - Remove git from this project (to start from scratch): `rm -rf .git`
-- Run all the git commands as outlined on the repo page
-  - Here it is in one command:
-    `git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/USERNAME/PROJECT_NAME.git && git push -u origin main`
+- Run all the git commands as outlined on the repo page:
+
+```
+git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main
+```
 
 ## Project Setup - Contentful
 
-If you run `npm run dev` to start the local development server at this point in time, you will get an error: `Error: Contentful spaceId and the access token need to be provided.`. This starter conviently comes with a Contentful setup script.
+If you run `npm run dev` to start the local development server at this point in time, you will get an error: `Error: Contentful spaceId and the access token need to be provided.`. Luckily, this starter comes with a Contentful setup script.
 
 - Run the command: `npm run setup`
   - Enter in your Space ID
@@ -43,7 +47,7 @@ If you run `npm run dev` to start the local development server at this point in 
     - Copy and paste this token
       - **NOTE**: This token will no longer be accessible from this point forward!
   - Enter in your Content Delivery API Access Token
-- Once complete, now you can run `npm run dev` to start the local development server
+- After that is done, now you can run `npm run dev` to start the local development server
 
 ## Gatsby Cloud Setup
 
@@ -66,6 +70,7 @@ If you run `npm run dev` to start the local development server at this point in 
     - `CONTENTFUL_PREVIEW_ACCESS_TOKEN` --> your content preview API access token
     - `CONTENTFUL_HOST` --> `preview.contentful.com`
     - `CONTENTFUL_SPACE_ID` --> your Contentful space ID
+  - All others not listed above can be removed
   - Click `Save`
 - Click `Build site`
   - The build can take a few minutes, so you will have to wait!
@@ -84,11 +89,11 @@ Let's test our workflow by making a simple change in the code. This will prove t
 
 ## Testing the Workflow Pt. 2 - Simple Contentful Change
 
-Let's test our workflow some more by making a simple change in the Contentful backend. The setup script created some starter models and content for us, so we will make a simple change to the Person content "John Doe". This will prove that whenever we make a change in Contentful, it will automatically trigger a re-build of the site on Gatsby Cloud.
+Let's test our workflow some more by making a simple change in the Contentful backend. The setup script created some starter models and content for us, so we will make a simple change to the Person content `John Doe`. This will prove that whenever we make a change in Contentful, it will automatically trigger a re-build of the site on Gatsby Cloud.
 
 - Go to the Contentful Space
-- Go to the Content tab, and click on the John Doe piece of Content
-- Make a simple change, like to the name
+  - Go to the `Content` tab, and click on the `John Doe` piece of content
+  - Make a simple change, like to the name, then click `Publish Changes`
 - Go to your Gatsby Dashboard
   - The build time for this is typically VERY quick, ~3-4 seconds
   - You should see the change on the site
@@ -519,22 +524,9 @@ And use it in `ArticlePreview` above the tags, for example, it will work just fi
 
 Here is a summary of the steps we will take:
 
-- Install all the necessary packages
 - Setup tsconfig.json
 - Convert all the components & pages to TypeScript
 - Convert the Gatsby API files to use TypeScript
-
-<!--
-  Packages installed:
-  - concurrently
-  - typescript
-
-  Type packages:
-  - @types/node
-  - @types/react
-  - @types/react-dom
-  - @types/react-helmet
--->
 
 ### Setup
 
@@ -562,9 +554,9 @@ Starting off:
 }
 ```
 
-Next, we need to install `concurrently` which will also to run multiple scripts, well, concurrently: `npm i concurrently`
+Next, we need to install `concurrently` which will allow us to run multiple scripts, well, concurrently: `npm i concurrently`
 
-Next, we need to update our `scripts` in `package.json`:
+Next, let's update our `scripts` in `package.json` to use `concurrently`:
 
 ```
 "dev-gatsby": "gatsby develop",
@@ -582,12 +574,10 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
 
 - Rename from `index.js` to `index.tsx`
 - When you do that, the TypeScript will complain about a few things:
-
   - The components you are importing (which we will convert to `.tsx` in a bit anyways, so no worries there)
   - The props `data` & `location` have the any type implicitly
   - The types for `allContentfulBlogPost` & `allContentfulPerson` are also unknown
   - A type error for the CSS Modules (since we are replacing them with Styled Components later on, no worries here either)
-
 - Luckily, Gatsby has types for us, and the one we need for pages is `PageProps`
   - Import it: `import type { PageProps } from 'gatsby'`
   - Then set the type of our destructured props to it:
@@ -743,6 +733,134 @@ Now let's update the components to `.tsx`! The steps are similar to the pages:
 
 ### Converting Gatsby API Files
 
+Now we will convert the Gatsby API files (gatsby-config, gatsby-node, etc.) to use TypeScript. The advantage of this is if the project should grow, it will be nice to have everything type-checked.
+
+The issue is, though, these files MUST be in .js for the Gatsby Runner to use them. So, how do we solve this problem?
+
+To start:
+
+- At the root level of the project, create a folder called `gatsby`
+- Copy and paste `gatsby-config.js` & `gatsby-node.js` into this folder and rename them to `.ts`
+- Download & install the following packages: `npm i dotenv gatsby-plugin-typescript ts-node`
+  - `dotenv` because we will get an ESLint error `import/no-extraneous-dependencies`
+  - `gatsby-plugin-typescript` allows Gatsby to build TypeScript and TSX files
+  - `ts-node `will allow us to us to recognize the TS syntax called from the JS files
+- Go to `gatsby-config.js` at the root level
+
+  - Select everything and replace it with this:
+
+  ```
+  require("ts-node").register();
+
+  module.exports = require("./gatsby/gatsby-config");
+  ```
+
+  - Note, this `gatsby-config.js` **MUST** remain as `.js`. We will be able to switch `gatsby-node` to `.ts`, though
+
+- Go `gatsby-config.ts` in the `gatsby` folder
+
+  - Replace this code:
+
+  ```
+  require('dotenv').config({
+    path: `.env.${process.env.NODE_ENV}`
+  });
+  ```
+
+  - With this code:
+
+  ```
+  import dotenv from 'dotenv';
+
+  dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+  ```
+
+  - Also update the object with the plugins, etc., being exported at the bottom from this:
+
+  ```
+  module.exports = {
+    // ...
+  };
+  ```
+
+  - To this:
+
+  ```
+  export default {
+    // ...
+  };
+  ```
+
+  - Lastly, we need to update the `contentfulConfig` object to include this: `host: process.env.CONTENTFUL_HOST`
+  - If we don't we get an error down below in the if check because we try to access `contentfulConfig.host`, but host doesn't exist initially in this variable
+  - It should look like this:
+
+  ```
+  const contentfulConfig = {
+    accessToken: process.env.CONTENTFUL_ACCESS_TOKEN || process.env.CONTENTFUL_DELIVERY_TOKEN,
+    host: process.env.CONTENTFUL_HOST,
+    spaceId: process.env.CONTENTFUL_SPACE_ID
+  };
+  ```
+
+Now to update gatsby-node:
+
+- For the `gatsby-node.js` file at the `root` level, we can actually rename it to `.ts`
+- Once you do, select everything and replace it with just this: `export * from "./gatsby/gatsby-node";`
+  - You will get an error saying that this file is not a module
+  - We just need to update the file to use the import/export syntax
+- Open `gatsby-node.ts` in the `gatsby` folder
+
+  - Replace this: `const path = require('path');`, with this: `import { resolve } from 'path';`
+  - Import the following type from the `gatsby` package: `import type { GatsbyNode } from 'gatsby';`
+  - Next, update the function from this:
+
+  ```
+  exports.createPages = async ({ graphql, actions, reporter }) => {
+    // ...
+  };
+  ```
+
+  - To this:
+
+  ```
+  export const createPages: GatsbyNode["createPages"] = async ({ graphql, actions, reporter }) => {
+    // ...
+  };
+  ```
+
+- At this point, we should see a type error down below for `const posts = result.data.allContentfulBlogPost.nodes` saying:
+  `Property 'allContentfulBlogPost' does not exist on type 'unknown'`
+- We need to setup the type for the result from the GraphQL query
+- Just outside & above createPages function, create a type called `GraphQLResult`
+  - The type should look like this:
+  ```
+  type GraphQLResult = {
+    allContentfulBlogPost: {
+      nodes: {
+        slug: string;
+        title: string;
+      }[];
+    };
+  };
+  ```
+- Next, simply apply this type to the GraphQL result variable and the error should go away:
+
+```
+const result = await graphql<GraphQLResult>(
+  // ...
+);
+```
+
+- And now another error should appear on result.data saying `Object is possibly 'undefined'`
+- Just above this line, add the following if check and the error should go away:
+
+```
+if (!result.data) {
+  throw new Error('Failed to get posts.');
+}
+```
+
 ## ESLint Setup
 
 - Start by running: `npx eslint --init`
@@ -761,12 +879,16 @@ Now let's update the components to `.tsx`! The steps are similar to the pages:
 
 ## Styled Components Setup
 
-### Simple Component Change
-
-- Download & install the following packages: `npm i styled-components @types/styled-components gatsby-plugin-styled-components`
+- Download & install the following packages: `npm i babel-plugin-styled-components gatsby-plugin-styled-components react-is styled-components @types/styled-components`
+  - `react-is` because if we don't, we get an error on Gatsby Cloud saying: `Can't resolve 'react-is' ...`
+  - `babel-plugin-styled-components`, `gatsby-plugin-styled-components`, & `styled-components` are the packages recommended by Gatsby themselves
+  - `@types/styled-components` is needed since styled-components don't come with types out of the box
 - Open `gatsby-config.js`:
   - In the `plugins` array, add this: `'gatsby-plugin-styled-components',`
   - Start fresh with: `npm run rebuild`
+
+### Simple Component Change
+
 - Let's make a simple adjustment to `ArticlePreview`
   - In the ArticlePreview folder, create a file called: `styles.ts`
   - Import styled-components: `import styled from 'styled-components';`
@@ -923,6 +1045,48 @@ const Layout = ({ children, location }: LayoutProps) => (
 );
 
 ```
+
+## Automatic Typing for GraphQL Queries
+
+First tried using gatsby-plugin-graphql-codegen: `npm i gatsby-plugin-graphql-codegen`
+In gatsby-config.ts:
+
+```
+{
+  resolve: 'gatsby-plugin-graphql-codegen',
+  options: {
+    documentPaths: ['src/**/*.{ts,tsx}', 'gatsby/gatsby-*.{js,ts}']
+  }
+}
+```
+
+Second, tried graphql-codegen directly
+Installed the following packages: `npm i graphql @graphql-codegen/cli` as per https://www.graphql-code-generator.com/docs/getting-started/installation
+Created `codegen.yml` file at the root level and pasted in this code:
+
+```
+schema: http://localhost:8000/___graphql
+documents:
+  - ./src/**/*.{ts,tsx}
+  - ./node_modules/gatsby*/!(node_modules)/**/*.js
+generates:
+  ./src/types/graphql-types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      avoidOptionals: true
+      maybeValue: T
+      inputMaybeValue: T
+      namingConvention:
+        enumValues: 'keep'
+```
+
+Added this script to package.json: `"types": "graphql-codegen --config codegen.yml"`
+Ran the script: `npm run types` and got big error message
+
+Installed 2 more packages: `npm i @graphql-codegen/typescript @graphql-codegen/typescript-operations`
+Ran the script again and it generated the file!
 
 ## Done!
 

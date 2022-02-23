@@ -4,20 +4,31 @@ This is my personal approach for generating a project using React, TypeScript, &
 
 ## GitHub Setup
 
-- Create a new repo on GitHub [here](https://github.com/new)
+- Create a new GitHub repo [here](https://github.com/new)
   - Give it at least a name, then click `Create repository`
   - Keep this tab open
 - On your local machine, create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
-- Download & install the Create React App TypeScript Template: `npx create-react-app . --template typescript`
+  - Where `PROJECT_NAME` matches the name of the GitHub repo you just created
+- Download the Create React App TypeScript template: `npx create-react-app . --template typescript`
 - After that is done, open it in VS Code: `code .`
 - Remove git from this project (so we can start from scratch): `rm -rf .git`
-- Run all the git commands as outlined on the repo page
-  - Here it is in one command:
-    `git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main`
+- Run all the git commands as outlined on the repo page:
+
+```
+git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main
+```
+
+## NPM Packages
+
+We only need a couple of extra packages for this setup:
+
+- [Netlify CLI](https://www.npmjs.com/package/netlify-cli)
+- [Styled Components](https://www.npmjs.com/package/styled-components)
+
+Download & install the following packages: `npm i netlify-cli styled-components @types/styled-components`
 
 ## Netlify Setup
 
-- At the root level of the project, install the Netlify CLI: `npm i netlify-cli`
 - Authenticate and obtain an access token by running: `npx netlify login`
 - Init a new Netlify site: `npx netlify init`
   - Select `Create & configure a new site`
@@ -33,10 +44,10 @@ This is my personal approach for generating a project using React, TypeScript, &
 
 ## CRA Cleanup
 
-- Go into the `src` folder: `cd src`
-  - Remove these files if not needed: `rm App.css App.test.tsx index.css logo.svg reportWebVitals.ts setupTests.ts`
-- Go into the `public` folder: `cd public`
-  - Remove these files if not needed: `rm logo192.png logo512.png manifest.json`
+- Go into the `src` folder:
+  - Remove these files: `rm App.css App.test.tsx index.css logo.svg reportWebVitals.ts setupTests.ts`
+- Go into the `public` folder:
+  - Remove these files: `rm logo192.png logo512.png manifest.json`
 - All that should be left are `App.tsx`, `index.tsx`, and `react-app-env.d.ts`
 - Copy and paste this code into `index.tsx`:
 
@@ -81,18 +92,17 @@ export default App;
 
 ## Styled Components Setup
 
-- Download & install the following packages: `npm i styled-components @types/styled-components`
 - In the `src` folder, create the following folders (at least):
   - `components`
   - `styles`
   - `types`
-- Run the command: `cd src && mkdir components styles types`
-- Go into the `styles` folder: `cd styles`
+    - Run the command: `mkdir components styles types`
+- Go into the `styles` folder:
   - Create the following 3 files:
     - `GlobalStyle.ts` (for global styling)
     - `lib.ts` (for shared styling)
     - `theme.ts` (for theme)
-  - Run the command: `cd styles && touch GlobalStyle.ts lib.ts theme.ts`
+      - Run the command: `touch GlobalStyle.ts lib.ts theme.ts`
 - Copy and paste this code into `lib.ts`:
 
 ```
@@ -264,9 +274,9 @@ export default GlobalStyle;
 
 ## Final Adjustments
 
-- Go to the components folder: `cd .. && cd components`
+- Go to the components folder:
   - Here, create a new `App` folder: `mkdir App`
-  - Next, `cd` back to the `src` directory
+  - Next, go back to the `src` directory
   - Now, move `App.tsx` into the `App` directory and rename it to `index.tsx`: `mv App.tsx components/App/index.tsx`
 - Go back to `index.tsx` in `src` and copy and paste this code:
 
