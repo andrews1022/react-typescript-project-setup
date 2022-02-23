@@ -8,8 +8,10 @@ This is my personal approach for generating a project using the [Contentful Blog
 - Continuous Integration with GitHub
 - Automatic re-builds on Gatsby Cloud
 
-## Contentful Setup
+## Contentful Setup Pt. 1
 
+- Create a free account with Contentful [here](https://www.contentful.com/sign-up/) first if you don't already have one
+  - Recommend signing up with GitHub
 - Login to Contentful [here](https://be.contentful.com/login)
 - Go to Settings > API keys
   - Make sure you are on the `Content delivery / preview tokens` tab
@@ -27,13 +29,13 @@ This is my personal approach for generating a project using the [Contentful Blog
 - Download the starter: `npx gatsby new . https://github.com/contentful/starter-gatsby-blog`
 - After that is done, open it in VS Code: `code .`
 - Remove git from this project (to start from scratch): `rm -rf .git`
-- Run all the git commands as outlined on the repo page:
+- Run all the git commands as outlined on the repo page to commit this progress:
 
 ```
 git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main
 ```
 
-## Project Setup - Contentful
+## Contentful Setup Pt. 2
 
 If you run `npm run dev` to start the local development server at this point in time, you will get an error: `Error: Contentful spaceId and the access token need to be provided.`. Luckily, this starter comes with a Contentful setup script.
 
@@ -75,7 +77,9 @@ If you run `npm run dev` to start the local development server at this point in 
 - Click `Build site`
   - The build can take a few minutes, so you will have to wait!
 
-## Testing the Workflow Pt. 1 - Simple Code Change
+## Testing the Workflow
+
+### Simple Code Change
 
 Let's test our workflow by making a simple change in the code. This will prove that whenever we make a commit / push to GitHub, it will automatically trigger a re-build of the site on Gatsby Cloud.
 
@@ -87,7 +91,7 @@ Let's test our workflow by making a simple change in the code. This will prove t
   - This should've triggered a re-build of the site
   - You might need to just refresh the page
 
-## Testing the Workflow Pt. 2 - Simple Contentful Change
+### Simple Contentful Change
 
 Let's test our workflow some more by making a simple change in the Contentful backend. The setup script created some starter models and content for us, so we will make a simple change to the Person content `John Doe`. This will prove that whenever we make a change in Contentful, it will automatically trigger a re-build of the site on Gatsby Cloud.
 
@@ -105,7 +109,9 @@ So, at this point, we have confirmed whenever we either:
 
 Gatsby Cloud will automatically trigger a re-build of the site, keeping it up-to-date at all times.
 
-## Starter Cleanup Pt. 1 - Removing Unnecessary Files & Folders
+## Starter Cleanup
+
+### Removing Unnecessary Files & Folders
 
 Let's take a quick moment to cleanup the starter code, as we no longer need some of the files / folders.
 
@@ -128,7 +134,7 @@ After some testing, here is a list of the files folders we can & cannot deleted 
 - [✕] .gitignore --> used to intentionally ignore/not track specific files/folders
 - [✕] .npmrc --> configuration file for NPM, defines the settings on how NPM should behave when running commands
 - [✕] .nvmrc --> specify which node version the project should use
-- [✓] .prettierrc --> config for prettier, this is entirely subjective so up to you (i use prettier settings in vs code)
+- [✓] .prettierrc --> config for prettier, this is entirely subjective so up to you (I use Prettier settings in VS Code)
 - [✓] .travis.yml --> config file for Travis CI (a hosted continuous integration service)
 - [✓] app.json --> unsure, not used anywhere
 - [✕] gatsby-config.js --> will convert to typescript later on
@@ -143,17 +149,18 @@ After some testing, here is a list of the files folders we can & cannot deleted 
 
 You may remove the files / folders marked with a '✓' as you wish.
 
-After that, let's do a quick restart/rebuild of the local server to make sure everything is still running ok: `rm -rf .cache public && npm run dev`
+### Updating NPM Scripts
 
-You should also add that command to your scripts in package.json, as it does come in handy: `"rebuild": "rm -rf .cache public && npm run dev"`
+- Open `package.json`:
+  - Add the `gatsby clean` script back in: `"clean": "gatsby clean"`
+  - Update the `dev` command to be: `"dev": "npm run clean && gatsby develop"`
+  - Then run `npm run dev` to make sure everything is still running ok
+  - Add this utility script as well: `"troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"`
+- At this point, I personally encountered a git error along the lines of `Fatal unable to access, could not resolve host` when trying to commit changes.
+  - If this happens, it's likely a proxy issue. Simply run this command and it should fix the problem:
+    `git config --global --unset http.proxy && git config --global --unset https.proxy`
 
-As well as this one: `"troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"`
-
-At this point, I personally encountered a git error along the lines of `Fatal unable to access, could not resolve host` when trying to commit changes. If this happens, it's likely a proxy issue. Simply run this command and it should fix the problem:
-
-`git config --global --unset http.proxy && git config --global --unset https.proxy`
-
-## Starter Cleanup Pt. 2 - Components & Pages
+### Components & Pages
 
 Somewhat frustratingly, the starter uses a mix of Classes and Functions for components & pages. Let's convert all the files using classes to use the function syntax. This makes it easier when we convert the files to TypeScript later on since everything is consistent.
 
@@ -561,7 +568,7 @@ Next, let's update our `scripts` in `package.json` to use `concurrently`:
 ```
 "dev-gatsby": "gatsby develop",
 "dev-typescript": "tsc -w",
-"dev": "concurrently \"npm:dev-gatsby\" \"npm:dev-typescript\"",
+"dev": "npm run clean && concurrently \"npm:dev-gatsby\" \"npm:dev-typescript\""
 ```
 
 At this point, we should run our rebuild script to start fresh: `npm run rebuild`

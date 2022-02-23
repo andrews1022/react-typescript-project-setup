@@ -12,7 +12,7 @@ This is my personal approach for generating a project using React, TypeScript, &
 - Download the Create React App TypeScript template: `npx create-react-app . --template typescript`
 - After that is done, open it in VS Code: `code .`
 - Remove git from this project (so we can start from scratch): `rm -rf .git`
-- Run all the git commands as outlined on the repo page:
+- Run all the git commands as outlined on the repo page to commit this progress:
 
 ```
 git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main
@@ -20,12 +20,10 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
 
 ## NPM Packages
 
-We only need a couple of extra packages for this setup:
-
-- [Netlify CLI](https://www.npmjs.com/package/netlify-cli)
-- [Styled Components](https://www.npmjs.com/package/styled-components)
-
-Download & install the following packages: `npm i netlify-cli styled-components @types/styled-components`
+- We only need a couple of extra packages for this setup:
+  - [Netlify CLI](https://www.npmjs.com/package/netlify-cli)
+  - [Styled Components](https://www.npmjs.com/package/styled-components)
+- Download & install the following packages: `npm i netlify-cli styled-components @types/styled-components`
 
 ## Netlify Setup
 
@@ -36,10 +34,14 @@ Download & install the following packages: `npm i netlify-cli styled-components 
   - Give the site a name (or leave blank, as it can always be renamed later)
   - Choose `Authorize with GitHub through app.netlify.com`
     - Click Authorize where needed
-  - Set your build command to: `npm run build`
-  - Set your build directory to: `build`
+    - Any other time this step will be done automatically and the CLI will go directly to the next step
+  - Set `Your build command` to: `npm run build`
+  - Set `Directory to deploy` to: `build`
   - Leave Netlify functions blank (just hit `Enter`)
   - Select `n` to not add the `netlify.toml` file
+- Go to the Netlify Dashboard [here](https://app.netlify.com/)
+  - Go to Sites and make sure the site was successfully deployed
+  - The build can take a few minutes, so you will have to wait!
 - Commit this progress: `git add . && git commit -m 'setup netlify continuous integration' && git push -u origin main`
 
 ## CRA Cleanup
