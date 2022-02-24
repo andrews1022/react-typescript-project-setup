@@ -26,8 +26,8 @@ Follow the steps outlined below to setup a simple React & Express project using 
   - Set `rootDir` to: `"rootDir": "./src"`
   - Leave all others as-is, and remove the excess comments
 - Now, we need to create the `src` folder: `mkdir src`
-- Go into this src folder, and create an index.ts: `cd src && touch index.ts`
-- In index.ts, add the following code:
+- Go into this `src` folder, and create an `index.ts`: `cd src && touch index.ts`
+- In `index.ts,` add the following code:
 
 ```
 import cors from 'cors';

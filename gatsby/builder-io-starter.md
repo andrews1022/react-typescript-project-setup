@@ -98,7 +98,89 @@ Testing the Hook:
 
 ## Creating a Custom Code Component
 
-- As
+Follow these steps to create a `Code Component`. A `Code Component` is a special type of component for Builder.io, which will allow you, or whomever, is editing the site in the Builder.io UI, to drag and drop into the layout and create dyanmic content for the site. In this example, we'll create a simple HeadingAndCopy component.
+
+### Static
+
+- In src/components, create a new folder: `mkdir HeadingAndCopy`
+- In this folder, create 2 files: `touch HeadingAndCopy.jsx HeadingAndCopy.builder.js`
+  - `HeadingAndCopy.jsx` is where the typical JSX/React component code will go
+  - `HeadingAndCopy.builder.js` is where the Builder.io config will go
+- In `HeadingAndCopy.jsx`, create a simple component to start:
+
+```
+import React from 'react';
+
+const HeadingAndCopy = () => {
+  return (
+    <div>
+      <h2>Heading here</h2>
+      <p>
+        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Repellat,
+        eius.
+      </p>
+    </div>
+  );
+};
+
+export default HeadingAndCopy;
+```
+
+- In `HeadingAndCopy.builder.js`, add this starter code:
+
+```
+import { Builder } from '@builder.io/react';
+import HeadingAndCopy from './HeadingAndCopy';
+
+Builder.registerComponent(HeadingAndCopy, {
+  name: 'Heading and Copy'
+});
+```
+
+- Finally, go to `src/builder-settings.js` and import the builder file: `import './components/HeadingAndCopy/HeadingAndCopy.builder';`
+- Now when you go to edit a page in Builder.io, you should see this component underneath "Code Components"
+  - Drag and drop it onto the page
+
+### Dynamic
+
+Now let's update this HeadingAndCopy component to use dynamic values in the editor
+
+- In `HeadingAndCopy.builder.js`, we can add `inputs` to our Code component:
+
+```
+Builder.registerComponent(HeadingAndCopy, {
+  name: 'Heading and Copy',
+  inputs: [
+    {
+      name: 'title',
+      type: 'string'
+    },
+    {
+      name: 'copy',
+      type: 'string'
+    }
+  ]
+});
+```
+
+- These inputs will allow the user to dynamically render the same component, but with different values
+
+- In `HeadingAndCopy.jsx`, let's update the JSX to use these dynamic values
+  - To access the values from these inputs, we take the `name` key from each object in the inputs array and access them via props
+  - So, with this component it will be `props.copy` & `props.title`
+  - We can use destructuring to clean up the code a bit, and have it look like this:
+  ```
+  const HeadingAndCopy = ({ copy, title }) => {
+    return (
+      <div>
+        <h2>{title}</h2>
+        <p>{copy}</p>
+      </div>
+    );
+  };
+  ```
+- Now, this component is 100% dynamic!
+- This is a simple example, but your component can truly be **ANYTHING** you can think of!
 
 ## Starter Cleanup
 
