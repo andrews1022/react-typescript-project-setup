@@ -96,6 +96,10 @@ Testing the Hook:
 - Go to the Netlify Dashboard [here](https://app.netlify.com/)
   - Go to Sites and you should see the site is rebuilding!
 
+## Creating a Custom Code Component
+
+- As
+
 ## Starter Cleanup
 
 - Update README
