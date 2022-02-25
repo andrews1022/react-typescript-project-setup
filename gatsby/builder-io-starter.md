@@ -189,11 +189,105 @@ Builder.registerComponent(HeadingAndCopy, {
 To see the changes after clicking `Publish Update` in Builder.io:
 
 - Locally:
-  - Simply stop the local dev server, then run the command `npm run develop`
+  - Simply stop the local dev server, then run the command `npm run dev`
   - This will clear the `.cache` and `public` folders, and start up the local dev server agaub, which gives you the lastest changes from Builder.io
 - Netlify:
+
   - Simply commit the changes
   - When you click `Publish Update`, this _will_ trigger a rebuild on Netlify because of our webhook, but the component will not show up until you commit the changes to GitHub
+
+## Layout Files Explained:
+
+- PageLayout.jsx
+  - for an example on wrapping your pages with conent from header and footer model entries.
+- RootLayout.jsx
+  - for rendering react-helmet and helmet related data, along with material-ui theme
+- LandingPage.jsx
+  - for using GraphQL to query and render Builder.io components and pages manually in parts of your Gatsby site and content
+- Hierarchy (HTML Simplified):
+  - body
+    - div # \_\_\_gastby
+      - RootLayout
+      - d # gatsby-focus-wrapper
+        - div . makeStyles-root-1
+          - div . makeStyles-header-2
+          - PageLayout
+          - div . makeStyles-content-4
+            - LandingPage
+            - div. builder-component
+              - Deeply nested within (5 levels down), each block is rendered here
+            - LandingPage
+          - PageLayout
+          - div . makeStyles-footer-3
+      - RootLayout
+- Hierarchy (JSX Simplified):
+  - RootLayout
+    - PageLayout
+      - LandingPage
+
+## Uninstalling Some NPM Packages
+
+- Uninstalled these packages:
+  - gh-pages
+  - prettier
+    - Run the command: `npm un gh-pages prettier`
+
+## Organizing Components Into Folders
+
+Builder starter already had components in their own folders, which is nice!
+
+## Components & Pages
+
+Making sure all components/pages follow this structure:
+
+- Components use function expression syntax
+- graphql query is placed BELOW export default of component
+- Destructure props where possible
+
+## Converting to TypeScript
+
+- Looks like Gatsby Version is far out of date, possiblly need to different starter and add in Builder.io instead of using Builder.io starter ?
+
+## Adding ESLint
+
+- Also guessing since things are out-of-date, ESLint can't properly be added either
+- Kept getting rules were not found?
+
+## Add New "Navigation" Model
+
+- Tried creating new `Navigation` model
+  - The idea was that this model would simply allow you to add pages, and you get the data back to create links in the JSX
+- While you can create a data model that returns a list of references to Landing pages, you don't get enough data to use it for anything
+- It return some ids, and other useless data
+- This query works just fine:
+
+```
+query MyQuery {
+  allBuilderModels {
+    landingPage {
+      id
+      name
+      data {
+        title
+        url
+      }
+    }
+  }
+}
+```
+
+## Removing Pre-Existing Models
+
+- Footer
+  - Builder.io admin
+    - Models, Footer
+    - 3 dots, Delete
+  - Code
+    - PageLayout.tsx, remove from graphql query and removed const variable
+- Header
+  - Same as steps taken for Footer
+  - Extra steps taken:
+    - Return JSX inside of StaticQuery instead, since we are not querying anything anymore
 
 ## Starter Cleanup
 

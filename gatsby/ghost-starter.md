@@ -34,6 +34,7 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
   - netlify.toml
   - renovate.json
   - yarn.lock
+    - command: `rm -rf .github plugins/gatsby-plugin-ghost-manifest/yarn.lock .editorconfig netlify.toml renovate.json yarn.lock`
 - updated version numbers in package.json
   - "react": "17.0.2" --> "16.9.0"
   - "react-dom": "17.0.2" --> "16.9.0"
@@ -45,3 +46,17 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
 - ran `npm run dev` again
 
 - optional: ran `npm i` in `plugins/gatsby-plugin-ghost-manifest` folder
+
+## Post Setup
+
+- changed .eslint.js --> .eslint.json
+- went to ghost dashboard, created new content api key
+  - settings > integrations > custom integration
+- updated .ghost.json with new apiUrl and contentApiKey
+- also updated gatsby-config with options as per docs
+- added page in ghost admin, published, didn't show up in localhost
+- stopped dev server, ran npm run dev (which also runs clean first), and it showed up!
+
+## Post Setup To Do
+
+- use updated versions of eslint and related packages
