@@ -1055,19 +1055,6 @@ const Layout = ({ children, location }: LayoutProps) => (
 
 ## Automatic Typing for GraphQL Queries
 
-First tried using gatsby-plugin-graphql-codegen: `npm i gatsby-plugin-graphql-codegen`
-In gatsby-config.ts:
-
-```
-{
-  resolve: 'gatsby-plugin-graphql-codegen',
-  options: {
-    documentPaths: ['src/**/*.{ts,tsx}', 'gatsby/gatsby-*.{js,ts}']
-  }
-}
-```
-
-Second, tried graphql-codegen directly
 Installed the following packages: `npm i graphql @graphql-codegen/cli` as per https://www.graphql-code-generator.com/docs/getting-started/installation
 Created `codegen.yml` file at the root level and pasted in this code:
 

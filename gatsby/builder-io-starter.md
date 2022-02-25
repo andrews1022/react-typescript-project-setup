@@ -4,6 +4,8 @@ This is my personal approach for generating a project using the [Builder.io Gats
 
 - Use TypeScript
 - Use Styled Components
+- Deploy to Netlify
+- Continuous Deployment with Builder.io and Netlify
 
 ## Builder.io Setup
 
@@ -181,6 +183,17 @@ Builder.registerComponent(HeadingAndCopy, {
   ```
 - Now, this component is 100% dynamic!
 - This is a simple example, but your component can truly be **ANYTHING** you can think of!
+
+### See the Changes
+
+To see the changes after clicking `Publish Update` in Builder.io:
+
+- Locally:
+  - Simply stop the local dev server, then run the command `npm run develop`
+  - This will clear the `.cache` and `public` folders, and start up the local dev server agaub, which gives you the lastest changes from Builder.io
+- Netlify:
+  - Simply commit the changes
+  - When you click `Publish Update`, this _will_ trigger a rebuild on Netlify because of our webhook, but the component will not show up until you commit the changes to GitHub
 
 ## Starter Cleanup
 
