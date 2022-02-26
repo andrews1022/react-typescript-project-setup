@@ -149,6 +149,10 @@ After some testing, here is a list of the files folders we can & cannot deleted 
 
 You may remove the files / folders marked with a '✓' as you wish.
 
+Command to remove files:
+
+`rm -rf bin contentful _config.yml .contentful.json.sample .prettierrc .travis.yml app.json package-lock.json screenshot.png static.jso WHATS-NEXT.md`
+
 ### Updating NPM Scripts
 
 - Open `package.json`:
@@ -541,7 +545,7 @@ Starting off:
 
 - First start by installing typescript: `npm i typescript`
 - Create a tsconfig file: `tsc --init`
-- Select everything in tsconfig.json, and replace it with this:
+- Select everything in `tsconfig.json`, and replace it with this:
 
 ```
 {

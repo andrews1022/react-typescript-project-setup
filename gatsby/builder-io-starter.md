@@ -11,7 +11,7 @@ This is my personal approach for generating a project using the [Builder.io Gats
 
 - Create a free account with Builder.io [here](https://builder.io/signup) first if you don't already have one
 - Once in your dashboard, click "Create a new Builder space" and give it a name
-- Then click this [link](https://builder.io/fork-sample-org) to generate some basic starter content for your space
+- Optional: Click this [link](https://builder.io/fork-sample-org) to generate some basic starter content for your space
 
 ## GitHub Setup
 
