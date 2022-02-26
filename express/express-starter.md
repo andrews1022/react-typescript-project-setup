@@ -29,7 +29,7 @@ Follow the steps outlined below to setup a simple React & Express project using 
 - Go into this `src` folder, and create an `index.ts`: `cd src && touch index.ts`
 - In `index.ts,` add the following code:
 
-```
+```javascript
 import cors from 'cors';
 import express from 'express';
 

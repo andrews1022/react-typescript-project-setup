@@ -81,8 +81,18 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
 ### Simple Code Change
 
 - In VS Code, go to `/src/components/article-preview.js`
-- Find this piece of JSX: `<h2 className={styles.title}>{post.title}</h2>`
-- Simply add on a few exclamation points after `{post.title}`: `<h2 className={styles.title}>{post.title}!!</h2>`
+- Find this piece of JSX:
+
+```javascript
+<h2 className={styles.title}>{post.title}</h2>
+```
+
+- Simply add on a few exclamation points after `{post.title}`:
+
+```javascript
+<h2 className={styles.title}>{post.title}!!</h2>
+```
+
 - Commit the change: `git add . && git commit -m 'quick commit for testing workflow' && git push -u origin main`
 - Go to your Gatsby Dashboard
   - This should've triggered a re-build of the site
@@ -181,7 +191,7 @@ Run this command to remove most files listed above with a ✓:
 
 Updated code:
 
-```
+```javascript
 const Layout = ({ children, location }) => {
 	return (
 		<>
@@ -200,7 +210,7 @@ export default Layout;
 
 Updated code:
 
-```
+```javascript
 const BlogIndex = ({ data, location }) => {
 	const posts = data.allContentfulBlogPost.nodes;
 
@@ -218,7 +228,7 @@ const BlogIndex = ({ data, location }) => {
 
 Updated code:
 
-```
+```javascript
 const Home = ({ data, location }) => {
 	const posts = data.allContentfulBlogPost.nodes;
 	const [author] = data.allContentfulPerson.nodes;
@@ -242,7 +252,7 @@ export default Home;
 
 Updated code:
 
-```
+```javascript
 const BlogPostTemplate = ({ data, location }) => {
 	const post = data.contentfulBlogPost;
 	const previous = data.previous;
@@ -313,7 +323,7 @@ const BlogPostTemplate = ({ data, location }) => {
   - Uninstall them all by running: `npm un contentful-import gh-pages lodash netlify-cli`.
 - We can also simply our `scripts` in `package.json` to:
 
-```
+```json
 "scripts": {
   "build": "gatsby build",
   "clean": "gatsby clean",
@@ -354,7 +364,7 @@ const BlogPostTemplate = ({ data, location }) => {
   - Pages
   - Gatsby API files (gatsby-config, gatsby-node, etc.)
 - Here is a summary of the steps we will take:
-  - Setup tsconfig.json
+  - Setup `tsconfig.json`
   - Convert all the components & pages to TypeScript
   - Convert the Gatsby API files to use TypeScript
 
@@ -386,7 +396,7 @@ Next, we need to install `concurrently` which will allow us to run multiple scri
 
 Next, let's update our `scripts` in `package.json` to use `concurrently`:
 
-```
+```json
 "dev-gatsby": "gatsby develop",
 "dev-typescript": "tsc -w",
 "dev": "npm run clean && concurrently \"npm:dev-gatsby\" \"npm:dev-typescript\""
@@ -407,13 +417,16 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
   - The types for `allContentfulBlogPost` & `allContentfulPerson` are also unknown
   - A type error for the CSS Modules (since we are replacing them with Styled Components later on, no worries here either)
 - Luckily, Gatsby has types for us, and the one we need for pages is `PageProps`
+
   - Import it: `import type { PageProps } from 'gatsby'`
   - Then set the type of our destructured props to it:
-  ```
+
+  ```javascript
   const Home = ({ data, location }: PageProps) => {
-    // ...
+  	// ...
   };
   ```
+
 - Next, we'll tackle the types for the GraphQL data
 
   - Outside the function body, just above, create a new type called `GraphQLResult`: `type GraphQLResult = {};`
@@ -423,60 +436,59 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
       - We will use this multiple times in this file, and we would get type errors in some files if we didn't
   - In `types.ts`, add the following:
 
-  ```
+  ```javascript
   export type BlogPost = {
-    title: string;
-    slug: string;
-    publishDate: string;
-    tags: string[];
-    heroImage: {
-      gatsbyImageData: IGatsbyImageData;
-    };
-    description: {
-      childMarkdownRemark: {
-        html: string;
-      };
-    };
+  	title: string,
+  	slug: string,
+  	publishDate: string,
+  	tags: string[],
+  	heroImage: {
+  		gatsbyImageData: IGatsbyImageData
+  	},
+  	description: {
+  		childMarkdownRemark: {
+  			html: string
+  		}
+  	}
   };
 
   export type Person = {
-    name: string;
-    shortBio: {
-      shortBio: string;
-    };
-    title: string;
-    heroImage: {
-      gatsbyImageData: IGatsbyImageData;
-    };
+  	name: string,
+  	shortBio: {
+  		shortBio: string
+  	},
+  	title: string,
+  	heroImage: {
+  		gatsbyImageData: IGatsbyImageData
+  	}
   };
   ```
 
   - These will be our re-usable types throughout the project
   - Back in the `index.tsx`, adjust the `GraphQLResult` type to:
 
-  ```
+  ```javascript
   type GraphQLResult = {
-    allContentfulBlogPost: {
-      nodes: BlogPost[];
-    };
-    allContentfulPerson: {
-      nodes: Person[];
-    };
+  	allContentfulBlogPost: {
+  		nodes: BlogPost[]
+  	},
+  	allContentfulPerson: {
+  		nodes: Person[]
+  	}
   };
   ```
 
   - Now, we can pass this type in as an additional argument to PageProps:
 
-  ```
+  ```javascript
   const Home = ({ data, location }: PageProps<GraphQLResult>) => {
-    // ...
+  	// ...
   };
   ```
 
   - And now the type errors for the Contentful data should be gone!
 
 - Repeat this process for `blog.js`
-
 - For the `blog-post.js` template, however:
 
   - After renaming to `.tsx`, you will get error saying `Module not found`
@@ -486,53 +498,53 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
     - Start fresh with `npm run rebuild`
   - In `types.ts`, add the following:
 
-  ```
+  ```javascript
   export type SingleBlogPost = {
-    author: {
-      name: string;
-    };
-    body: {
-      childMarkdownRemark: {
-        html: string;
-        timeToRead: number;
-      };
-    };
-    description: {
-      childMarkdownRemark: {
-        excerpt: string;
-      };
-    };
-    heroImage: {
-      gatsbyImageData: IGatsbyImageData;
-      resize: {
-        src: string;
-      };
-    };
-    publishDate: string;
-    rawDate: string;
-    slug: string;
-    tags: string[];
-    title: string;
+  	author: {
+  		name: string
+  	},
+  	body: {
+  		childMarkdownRemark: {
+  			html: string,
+  			timeToRead: number
+  		}
+  	},
+  	description: {
+  		childMarkdownRemark: {
+  			excerpt: string
+  		}
+  	},
+  	heroImage: {
+  		gatsbyImageData: IGatsbyImageData,
+  		resize: {
+  			src: string
+  		}
+  	},
+  	publishDate: string,
+  	rawDate: string,
+  	slug: string,
+  	tags: string[],
+  	title: string
   };
 
-  export type NextPrevious = { slug: string; title: string } | null;
+  export type NextPrevious = { slug: string, title: string } | null;
   ```
 
   - Back in the `blog-post.tsx`, adjust the `GraphQLResult` type to:
 
-  ```
+  ```javascript
   type GraphQLResult = {
-    contentfulBlogPost: SingleBlogPost;
-    next: NextPrevious;
-    previous: NextPrevious;
+  	contentfulBlogPost: SingleBlogPost,
+  	next: NextPrevious,
+  	previous: NextPrevious
   };
   ```
 
   - Then pass it to `PageProps`:
 
-  ```
+  ```javascript
   const BlogPostTemplate = ({ data, location }: PageProps<GraphQLResult>) => {
-    // ...
+  	// ...
   };
   ```
 
@@ -545,14 +557,14 @@ Now let's update the components to `.tsx`! The steps are similar to the pages:
 
   - Example:
 
-  ```
+  ```javascript
   // props
   type ArticlePreviewProps = {
-    posts: BlogPost[];
+  	posts: BlogPost[]
   };
 
   const ArticlePreview = ({ posts }: ArticlePreviewProps) => {
-    // ...
+  	// ...
   };
   ```
 
@@ -577,10 +589,10 @@ To start:
 
   - Select everything and replace it with this:
 
-  ```
-  require("ts-node").register();
+  ```javascript
+  require('ts-node').register();
 
-  module.exports = require("./gatsby/gatsby-config");
+  module.exports = require('./gatsby/gatsby-config');
   ```
 
   - Note, this `gatsby-config.js` **MUST** remain as `.js`. We will be able to switch `gatsby-node` to `.ts`, though
@@ -589,15 +601,15 @@ To start:
 
   - Replace this code:
 
-  ```
+  ```javascript
   require('dotenv').config({
-    path: `.env.${process.env.NODE_ENV}`
+  	path: `.env.${process.env.NODE_ENV}`
   });
   ```
 
   - With this code:
 
-  ```
+  ```javascript
   import dotenv from 'dotenv';
 
   dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
@@ -605,17 +617,17 @@ To start:
 
   - Also update the object with the plugins, etc., being exported at the bottom from this:
 
-  ```
+  ```javascript
   module.exports = {
-    // ...
+  	// ...
   };
   ```
 
   - To this:
 
-  ```
+  ```javascript
   export default {
-    // ...
+  	// ...
   };
   ```
 
@@ -623,11 +635,11 @@ To start:
   - If we don't we get an error down below in the if check because we try to access `contentfulConfig.host`, but host doesn't exist initially in this variable
   - It should look like this:
 
-  ```
+  ```javascript
   const contentfulConfig = {
-    accessToken: process.env.CONTENTFUL_ACCESS_TOKEN || process.env.CONTENTFUL_DELIVERY_TOKEN,
-    host: process.env.CONTENTFUL_HOST,
-    spaceId: process.env.CONTENTFUL_SPACE_ID
+  	accessToken: process.env.CONTENTFUL_ACCESS_TOKEN || process.env.CONTENTFUL_DELIVERY_TOKEN,
+  	host: process.env.CONTENTFUL_HOST,
+  	spaceId: process.env.CONTENTFUL_SPACE_ID
   };
   ```
 
@@ -643,17 +655,17 @@ Now to update gatsby-node:
   - Import the following type from the `gatsby` package: `import type { GatsbyNode } from 'gatsby';`
   - Next, update the function from this:
 
-  ```
+  ```javascript
   exports.createPages = async ({ graphql, actions, reporter }) => {
-    // ...
+  	// ...
   };
   ```
 
   - To this:
 
-  ```
-  export const createPages: GatsbyNode["createPages"] = async ({ graphql, actions, reporter }) => {
-    // ...
+  ```javascript
+  export const createPages: GatsbyNode['createPages'] = async ({ graphql, actions, reporter }) => {
+  	// ...
   };
   ```
 
@@ -661,20 +673,23 @@ Now to update gatsby-node:
   `Property 'allContentfulBlogPost' does not exist on type 'unknown'`
 - We need to setup the type for the result from the GraphQL query
 - Just outside & above createPages function, create a type called `GraphQLResult`
+
   - The type should look like this:
-  ```
+
+  ```javascript
   type GraphQLResult = {
-    allContentfulBlogPost: {
-      nodes: {
-        slug: string;
-        title: string;
-      }[];
-    };
+  	allContentfulBlogPost: {
+  		nodes: {
+  			slug: string,
+  			title: string
+  		}[]
+  	}
   };
   ```
+
 - Next, simply apply this type to the GraphQL result variable and the error should go away:
 
-```
+```javascript
 const result = await graphql<GraphQLResult>(
   // ...
 );
@@ -683,9 +698,9 @@ const result = await graphql<GraphQLResult>(
 - And now another error should appear on result.data saying `Object is possibly 'undefined'`
 - Just above this line, add the following if check and the error should go away:
 
-```
+```javascript
 if (!result.data) {
-  throw new Error('Failed to get posts.');
+	throw new Error('Failed to get posts.');
 }
 ```
 
@@ -718,24 +733,27 @@ if (!result.data) {
 ### Simple Component Change
 
 - Let's make a simple adjustment to `ArticlePreview`
+
   - In the ArticlePreview folder, create a file called: `styles.ts`
   - Import styled-components: `import styled from 'styled-components';`
   - Open up the CSS modules file
   - Let's convert .article-list to a styled component
   - Copy and paste this into styles.ts:
-  ```
+
+  ```javascript
   export const ArticleList = styled.ul`
-    display: grid;
-    grid-gap: 48px;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  	display: grid;
+  	grid-gap: 48px;
+  	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  	list-style: none;
+  	margin: 0;
+  	padding: 0;
   `;
   ```
+
 - Back in index.tsx, add the following:
 
-  ```
+  ```javascript
   // styled components
   import * as S from './styles';
   ```
@@ -743,26 +761,20 @@ if (!result.data) {
   - We use `import * as S` so we can differentiate styled components from our functional components
   - In the JSX, replace this:
 
-  ```
-  <ul className={styles.articleList}>
-    // ...
-  </ul>
+  ```javascript
+  <ul className={styles.articleList}>// ...</ul>
   ```
 
   - With this:
 
-  ```
-  <S.ArticleList>
-    // ...
-  </S.ArticleList>
+  ```javascript
+  <S.ArticleList>// ...</S.ArticleList>
   ```
 
   - And if we check the Elements Tab in DevTools, we should see something like:
 
-  ```
-  <ul class="styles__ArticleList-bfmZnV jUEOQo">
-    // ...
-  </ul>
+  ```javascript
+  <ul class='styles__ArticleList-bfmZnV jUEOQo'>// ...</ul>
   ```
 
   - Of course, the randomly generated class names will be different than from what you see here
@@ -781,7 +793,7 @@ First, let's create the GlobalStyle component:
 - In this file, import createGlobalStyle: `import { createGlobalStyle } from "styled-components";`
 - Next add this starting code:
 
-```
+```javascript
 const GlobalStyle = createGlobalStyle``;
 
 export default GlobalStyle;
@@ -789,7 +801,7 @@ export default GlobalStyle;
 
 - Inside the backticks is where you can place your global styles you want applied. Let's copy and paste some from global.css into there and make the necessary adjustments:
 
-```
+```javascript
 const GlobalStyle = createGlobalStyle`
   html {
     scroll-behavior: smooth;
@@ -817,7 +829,7 @@ Next, let's create the global theme object
 
 - Inside the styles folder, create a new file called theme.ts, and added this code to start:
 
-```
+```javascript
 const theme = {
 	mediaQueries: {
 		desktopHD: 'only screen and (max-width: 1920px)',
@@ -847,9 +859,9 @@ Now, let's use both of them. To do so, open the `Layout` component file (`src/co
 
 - In there, import both of these files, along with `ThemeProvider` from `styled-components`:
 
-```
+```javascript
 // styled components
-import { ThemeProvider } from "styled-components";
+import { ThemeProvider } from 'styled-components';
 import GlobalStyle from '../../styles/GlobalStyle';
 import theme from '../../styles/theme';
 ```
@@ -861,7 +873,7 @@ import theme from '../../styles/theme';
   - So, we can pass in our theme object as value
 - In the end, the JSX should look like this:
 
-```
+```javascript
 const Layout = ({ children, location }: LayoutProps) => (
 	<ThemeProvider theme={theme}>
 		<GlobalStyle />
@@ -871,7 +883,6 @@ const Layout = ({ children, location }: LayoutProps) => (
 		<Footer />
 	</ThemeProvider>
 );
-
 ```
 
 ## Automatic Typing for GraphQL Queries
@@ -879,7 +890,7 @@ const Layout = ({ children, location }: LayoutProps) => (
 Installed the following packages: `npm i graphql @graphql-codegen/cli` as per https://www.graphql-code-generator.com/docs/getting-started/installation
 Created `codegen.yml` file at the root level and pasted in this code:
 
-```
+```yml
 schema: http://localhost:8000/___graphql
 documents:
   - ./src/**/*.{ts,tsx}
