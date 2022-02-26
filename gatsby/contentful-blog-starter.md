@@ -13,11 +13,12 @@ This is my personal approach for generating a project using the [Contentful Blog
 - Create a free account with Contentful [here](https://www.contentful.com/sign-up/) first if you don't already have one
   - Recommend signing up with GitHub
 - Login to Contentful [here](https://be.contentful.com/login)
+- For any subsequent visits, you can go to your Contentful Admin [here](https://app.contentful.com/)
 - Go to Settings > API keys
   - Make sure you are on the `Content delivery / preview tokens` tab
   - Click `Add API key` button in the top right corner
-  - Give it a name at least, and also description
-  - Click `Save`
+  - Give it a name at least, and click `Save`
+  - Keep this tab open
 
 ## GitHub Setup
 
@@ -36,8 +37,6 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
 ```
 
 ## Contentful Setup Pt. 2
-
-If you run `npm run dev` to start the local development server at this point in time, you will get an error: `Error: Contentful spaceId and the access token need to be provided.`. Luckily, this starter comes with a Contentful setup script.
 
 - Run the command: `npm run setup`
   - Enter in your Space ID
@@ -81,11 +80,9 @@ If you run `npm run dev` to start the local development server at this point in 
 
 ### Simple Code Change
 
-Let's test our workflow by making a simple change in the code. This will prove that whenever we make a commit / push to GitHub, it will automatically trigger a re-build of the site on Gatsby Cloud.
-
 - In VS Code, go to `/src/components/article-preview.js`
 - Find this piece of JSX: `<h2 className={styles.title}>{post.title}</h2>`
-- Simply add on a few exclaimation points after `{post.title}`: `<h2 className={styles.title}>{post.title}!!</h2>`
+- Simply add on a few exclamation points after `{post.title}`: `<h2 className={styles.title}>{post.title}!!</h2>`
 - Commit the change: `git add . && git commit -m 'quick commit for testing workflow' && git push -u origin main`
 - Go to your Gatsby Dashboard
   - This should've triggered a re-build of the site
@@ -93,63 +90,56 @@ Let's test our workflow by making a simple change in the code. This will prove t
 
 ### Simple Contentful Change
 
-Let's test our workflow some more by making a simple change in the Contentful backend. The setup script created some starter models and content for us, so we will make a simple change to the Person content `John Doe`. This will prove that whenever we make a change in Contentful, it will automatically trigger a re-build of the site on Gatsby Cloud.
-
 - Go to the Contentful Space
   - Go to the `Content` tab, and click on the `John Doe` piece of content
   - Make a simple change, like to the name, then click `Publish Changes`
 - Go to your Gatsby Dashboard
   - The build time for this is typically VERY quick, ~3-4 seconds
   - You should see the change on the site
-
-So, at this point, we have confirmed whenever we either:
-
-- A) Make a change in the code and commit / push to GitHub
-- B) Make a change in the Contentful backend
-
-Gatsby Cloud will automatically trigger a re-build of the site, keeping it up-to-date at all times.
+- So, at this point, we have confirmed whenever we either:
+  - A) Make a change in the code and commit / push to GitHub
+  - B) Make a change in the Contentful backend
+- Gatsby Cloud will automatically trigger a re-build of the site, keeping it up-to-date at all times.
 
 ## Starter Cleanup
 
 ### Removing Unnecessary Files & Folders
 
-Let's take a quick moment to cleanup the starter code, as we no longer need some of the files / folders.
-
-After some testing, here is a list of the files folders we can & cannot deleted post-setup:
+Here is a list of the files and folders we can & cannot deleted post-setup:
 
 ✓ --> CAN be removed
 
 ✕ --> CANNOT be removed
 
-- [✓] .cache --> can be deleted, but is regenerated each time you rebuild, and is ignored by git anyways
-- [✓] /bin & package.json scripts --> used for running `npm run dev` to setup contentful
-- [✓] /contentful --> used for running `npm run dev` to setup contentful
-- [✓] /node_modules --> can be deleted, but is regenerated each time you install packages, and is ignored by git anyways
-- [✓] /public --> can be deleted, but is regenerated each time you rebuild, and is ignored by git anyways
-- [✕] /src --> essential
-- [✕] /static --> used to house files like robots.txt and favicon
-- [✓] \_config.yml --> used for GitHub pages
-- [✕] .babelrc --> babel config file
-- [✓] .contentful.json.sample --> sample contentful data file
-- [✕] .gitignore --> used to intentionally ignore/not track specific files/folders
-- [✕] .npmrc --> configuration file for NPM, defines the settings on how NPM should behave when running commands
-- [✕] .nvmrc --> specify which node version the project should use
-- [✓] .prettierrc --> config for prettier, this is entirely subjective so up to you (I use Prettier settings in VS Code)
-- [✓] .travis.yml --> config file for Travis CI (a hosted continuous integration service)
-- [✓] app.json --> unsure, not used anywhere
-- [✕] gatsby-config.js --> will convert to typescript later on
-- [✕] gatsby-node.js --> will convert to typescript later on
-- [✕] LICENSE --> ok to leave, no harm
-- [✓] package-lock.json --> can be deleted, but is regenerated each time you install packages
-- [✕] package.json --> essential
-- [✕] README.md --> essential
-- [✓] screenshot.png --> was used in the README, no longer needed
-- [✓] static.json --> unsure, not used anywhere, possibly used for Heroku
-- [✓] WHATS-NEXT.md --> Simple markdown file
+- [✓] `.cache` --> can be deleted, but is regenerated each time you rebuild, and is ignored by git anyways
+- [✓] `/bin` & related `package.json` scripts --> used for running `npm run dev` to setup contentful
+- [✓] `/contentful` --> used for running `npm run dev` to setup contentful
+- [✓] `/node_modules` --> can be deleted, but is regenerated each time you install packages, and is ignored by git anyways
+- [✓] `/public` --> can be deleted, but is regenerated each time you rebuild, and is ignored by git anyways
+- [✕] `/src` --> essential
+- [✕] `/static` --> used to house files like robots.txt and favicon
+- [✓] `_config.yml` --> used for GitHub pages
+- [✕] `.babelrc` --> babel config file
+- [✓] `.contentful.json.sample` --> sample contentful data file
+- [✕] `.gitignore` --> used to intentionally ignore/not track specific files/folders
+- [✕] `.npmrc` --> configuration file for NPM, defines the settings on how NPM should behave when running commands
+- [✕] `.nvmrc` --> specify which node version the project should use
+- [✓] `.prettierrc` --> config for prettier, this is entirely subjective so up to you (I use Prettier settings in VS Code)
+- [✓] `.travis.yml` --> config file for Travis CI (a hosted continuous integration service)
+- [✓] `app.json` --> unsure, not used anywhere
+- [✕] `gatsby-config.js` --> will convert to typescript later on
+- [✕] `gatsby-node.js` --> will convert to typescript later on
+- [✕] `LICENSE` --> ok to leave, no harm
+- [✓] `package-lock.json` --> can be deleted, but is regenerated each time you install packages
+- [✕] `package.json` --> essential
+- [✕] `README.md` --> essential
+- [✓] `screenshot.png` --> was used in the README, no longer needed
+- [✓] `static.json` --> unsure, not used anywhere, possibly used for Heroku
+- [✓] `WHATS-NEXT.md` --> Simple markdown file
 
 You may remove the files / folders marked with a '✓' as you wish.
 
-Command to remove files:
+Run this command to remove most files listed above with a ✓:
 
 `rm -rf bin contentful _config.yml .contentful.json.sample .prettierrc .travis.yml app.json package-lock.json screenshot.png static.jso WHATS-NEXT.md`
 
@@ -158,28 +148,20 @@ Command to remove files:
 - Open `package.json`:
   - Add the `gatsby clean` script back in: `"clean": "gatsby clean"`
   - Update the `dev` command to be: `"dev": "npm run clean && gatsby develop"`
-  - Then run `npm run dev` to make sure everything is still running ok
   - Add this utility script as well: `"troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"`
-- At this point, I personally encountered a git error along the lines of `Fatal unable to access, could not resolve host` when trying to commit changes.
-  - If this happens, it's likely a proxy issue. Simply run this command and it should fix the problem:
-    `git config --global --unset http.proxy && git config --global --unset https.proxy`
+- If you encounter a git error along the lines of `Fatal unable to access, could not resolve host` when trying to commit changes, it's likely a proxy issue. Simply run this command and it should fix the problem:
+  `git config --global --unset http.proxy && git config --global --unset https.proxy`
 
 ### Components & Pages
 
-Somewhat frustratingly, the starter uses a mix of Classes and Functions for components & pages. Let's convert all the files using classes to use the function syntax. This makes it easier when we convert the files to TypeScript later on since everything is consistent.
-
-The list of files we need to adjust are:
+- Let's convert all the files using classes to use the function expression syntax. The list of files we need to adjust are:
 
 - `src/components/layout.js`
 - `src/pages/blog.js`
 - `src/pages/index.js`
 - `src/templates/blog-post.js`
 
-Furthermore, all the component files use kebab-case for naming. Personally, I prefer to use PascalCase (as you do in CRA or Next apps). So I will update all file names to use PascalCase instead. I understand that they are likely all kebab-case to be consistent with the pages and templates, this just a personal preference.
-
-DO NOT rename page files to use PascalCase. Gatsby uses the file name for routing, so if you change blog.js to Blog.js, the route will no longer work.
-
-Lastly, I will group each component and it's CSS module file together in a folder to keep things a big organized. The file/folder structure will now be:
+- Also make sure group each component and it's CSS module file together in a folder to keep things a big organized. The file/folder structure will now be:
 
 ```
 /components
@@ -195,52 +177,9 @@ Lastly, I will group each component and it's CSS module file together in a folde
 
 ```
 
-Again, this is just my personal approach that I've always used. Totally up to you how you want to organize things.
+### layout.js
 
-Later on when we setup Styled Components, we will replace each `*.module.css` file with a `styles.ts` file. This file will house any styled components used by the functional component in the same folder. So, the structure then will be:
-
-```
-/components
-  /ArticlePreview
-    - index.tsx
-    - styles.ts
-  /Container
-    - index.tsx
-  /Footer
-    - index.tsx
-    - styles.ts
-  etc.
-
-```
-
-So, I will not bother renaming the CSS module files since they will be replaced anyways.
-
-Alright, let's get started!
-
-### Layout.js
-
-Replace this code:
-
-```
-class Template extends React.Component {
-	render() {
-		const { children } = this.props;
-
-		return (
-			<>
-				<Seo />
-				<Navigation />
-				<main>{children}</main>
-				<Footer />
-			</>
-		);
-	}
-}
-
-export default Template;
-```
-
-With this code:
+Updated code:
 
 ```
 const Layout = ({ children, location }) => {
@@ -257,27 +196,9 @@ const Layout = ({ children, location }) => {
 export default Layout;
 ```
 
-### Blog.js
+### blog.js
 
-Replace this code:
-
-```
-class BlogIndex extends React.Component {
-	render() {
-		const posts = get(this, 'props.data.allContentfulBlogPost.nodes');
-
-		return (
-			<Layout location={this.props.location}>
-				<Seo title='Blog' />
-				<Hero title='Blog' />
-				<ArticlePreview posts={posts} />
-			</Layout>
-		);
-	}
-}
-```
-
-With this code:
+Updated code:
 
 ```
 const BlogIndex = ({ data, location }) => {
@@ -293,35 +214,9 @@ const BlogIndex = ({ data, location }) => {
 };
 ```
 
-Pages access the data returned from the `graphql` query via the `data` prop. We use this approach for the remaining files
+### index.js
 
-### RootIndex.js
-
-Replace this code:
-
-```
-class RootIndex extends React.Component {
-	render() {
-		const posts = get(this, 'props.data.allContentfulBlogPost.nodes');
-		const [author] = get(this, 'props.data.allContentfulPerson.nodes');
-
-		return (
-			<Layout location={this.props.location}>
-				<Hero
-					image={author.heroImage.gatsbyImageData}
-					title={author.name}
-					content={author.shortBio.shortBio}
-				/>
-				<ArticlePreview posts={posts} />
-			</Layout>
-		);
-	}
-}
-
-export default RootIndex;
-```
-
-With this code:
+Updated code:
 
 ```
 const Home = ({ data, location }) => {
@@ -343,71 +238,9 @@ const Home = ({ data, location }) => {
 export default Home;
 ```
 
-### BlogPostTemplate.js
+### blog-post.js
 
-Replace this code:
-
-```
-class BlogPostTemplate extends React.Component {
-	render() {
-		const post = get(this.props, 'data.contentfulBlogPost');
-		const previous = get(this.props, 'data.previous');
-		const next = get(this.props, 'data.next');
-
-		return (
-			<Layout location={this.props.location}>
-				<Seo
-					title={post.title}
-					description={post.description.childMarkdownRemark.excerpt}
-					image={`http:${post.heroImage.resize.src}`}
-				/>
-				<Hero
-					image={post.heroImage?.gatsbyImageData}
-					title={post.title}
-					content={post.description?.childMarkdownRemark?.excerpt}
-				/>
-				<div className={styles.container}>
-					<span className={styles.meta}>
-						{post.author?.name} &middot; <time dateTime={post.rawDate}>{post.publishDate}</time> –{' '}
-						{post.body?.childMarkdownRemark?.timeToRead} minute read
-					</span>
-					<div className={styles.article}>
-						<div
-							className={styles.body}
-							dangerouslySetInnerHTML={{
-								__html: post.body?.childMarkdownRemark?.html
-							}}
-						/>
-						<Tags tags={post.tags} />
-						{(previous || next) && (
-							<nav>
-								<ul className={styles.articleNavigation}>
-									{previous && (
-										<li>
-											<Link to={`/blog/${previous.slug}`} rel='prev'>
-												← {previous.title}
-											</Link>
-										</li>
-									)}
-									{next && (
-										<li>
-											<Link to={`/blog/${next.slug}`} rel='next'>
-												{next.title} →
-											</Link>
-										</li>
-									)}
-								</ul>
-							</nav>
-						)}
-					</div>
-				</div>
-			</Layout>
-		);
-	}
-}
-```
-
-With this code:
+Updated code:
 
 ```
 const BlogPostTemplate = ({ data, location }) => {
@@ -472,16 +305,13 @@ const BlogPostTemplate = ({ data, location }) => {
 
 ### Uninstalling Some NPM Packages
 
-At this point, we are no longer using `lodash`. In fact, we are no longer using any of the following packages:
-
+- We are no longer using any of the following packages:
 - `contentful-import`
 - `gh-pages`
 - `lodash`
 - `netlify-cli`
-
-So, stop the local development server (`Ctrl + C`), and then we can uninstall them all by running: `npm un contentful-import gh-pages lodash netlify-cli`.
-
-We can also simply our `scripts` in `package.json` to:
+  - Uninstall them all by running: `npm un contentful-import gh-pages lodash netlify-cli`.
+- We can also simply our `scripts` in `package.json` to:
 
 ```
 "scripts": {
@@ -496,58 +326,45 @@ We can also simply our `scripts` in `package.json` to:
 
 ### Organizing Components Into Folders
 
-First, go into the components folder: `cd src/components/`
-
-Next, we need to create all folders for each component:
-
-- ArticlePreview
-- Container
-- Footer
-- Hero
-- Layout
-- Navigation
-- Seo
-- Tags
-
-We can create them all at once by running: `mkdir ArticlePreview Container Footer Hero Layout Navigation Seo Tags`
-
-Now, one at a time, move the corresponding files into their folders. Hopefully VS Code automatically updates the import path(s) for you. If not, you will have to manually update them yourself.
-
-After moving everything around, you should see the following warning: `warn chunk commons [mini-css-extract-plugin]`
-
-This error/warning is caused by the Webpack plugin mini-css-extract-plugin wanting all CSS imports to be in the same order. This is because it confused CSS modules with plain CSS.
-
-However, since we will be using Styled Components, we can ignore this warning and continue. If you wish to continue using CSS Modules, simply google `warn chunk commons mini-css-extract-plugin gatsby` and you will find plenty of results on troubleshooting the warning.
+- First, go into the components folder: `cd src/components/`
+  - We need to create all folders for each component:
+    - ArticlePreview
+    - Container
+    - Footer
+    - Hero
+    - Layout
+    - Navigation
+    - Seo
+    - Tags
+  - Create them all at once by running: `mkdir ArticlePreview Container Footer Hero Layout Navigation Seo Tags`
+- Now, one at a time, move the corresponding files into their folders
+  - Hopefully VS Code automatically updates the import path(s) for you
+  - If not, you will have to manually update them yourself
+- After moving everything around, you should see the following warning: `warn chunk commons [mini-css-extract-plugin]`
+  - This error/warning is caused by the Webpack plugin `mini-css-extract-plugin` wanting all CSS imports to be in the same order
+  - This is because it confused CSS modules with plain CSS.
+  - However, since we will be using Styled Components, we can ignore this warning and continue.
 
 ## Converting to TypeScript
 
-Now comes a BIG step: converting everything to TypeScript! We will convert all components, pages, and even the Gatsby API files (gatsby-config, gatsby-node, etc.) at the root level to use TypeScript.
-
-Gatsby claims to support TypeScript out of the box. This is partially true. If we create a simple Copy component:
-
-```
-const Copy = () => (
-	<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Error, nesciunt?</p>
-);
-```
-
-And use it in `ArticlePreview` above the tags, for example, it will work just fine. However, we don't get proper type checking. VS Code will highlight the error, but the Gatsby CLI will not.
-
-Here is a summary of the steps we will take:
-
-- Setup tsconfig.json
-- Convert all the components & pages to TypeScript
-- Convert the Gatsby API files to use TypeScript
+- None of Gatsby's starters are fully good-to-go in TypeScript, so we must manually convert all `.js`/`.jsx` files to `.ts`/`.tsx`
+- We also don't get proper type checking. VS Code will highlight the error, but the Gatsby CLI will not.
+- We will update the following to use TypeScript:
+  - Components
+  - Pages
+  - Gatsby API files (gatsby-config, gatsby-node, etc.)
+- Here is a summary of the steps we will take:
+  - Setup tsconfig.json
+  - Convert all the components & pages to TypeScript
+  - Convert the Gatsby API files to use TypeScript
 
 ### Setup
 
-Starting off:
-
-- First start by installing typescript: `npm i typescript`
+- Start by installing typescript: `npm i typescript`
 - Create a tsconfig file: `tsc --init`
 - Select everything in `tsconfig.json`, and replace it with this:
 
-```
+```json
 {
 	"compilerOptions": {
 		"esModuleInterop": true,

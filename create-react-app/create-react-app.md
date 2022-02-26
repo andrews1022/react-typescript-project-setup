@@ -53,32 +53,31 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
 - All that should be left are `App.tsx`, `index.tsx`, and `react-app-env.d.ts`
 - Copy and paste this code into `index.tsx`:
 
-```
+```javascript
 import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
 ReactDOM.render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-  document.getElementById('root')
+	<StrictMode>
+		<App />
+	</StrictMode>,
+	document.getElementById('root')
 );
 ```
 
 - Copy and paste this code into `App.tsx`:
 
-```
+```javascript
 import React from 'react';
 
 const App = () => (
-  <div>
-    <h1>Hello from App.tsx!</h1>
-  </div>
+	<div>
+		<h1>Hello from App.tsx!</h1>
+	</div>
 );
 
 export default App;
-
 ```
 
 - Commit this progress: `git add . && git commit -m 'updated boilerplate files' && git push -u origin main`
@@ -107,10 +106,10 @@ export default App;
       - Run the command: `touch GlobalStyle.ts lib.ts theme.ts`
 - Copy and paste this code into `lib.ts`:
 
-```
+```javascript
 // a library of reusable styled components / base styles to be used anywhere in the project
 
-import styled, { css } from "styled-components";
+import styled, { css } from 'styled-components';
 ```
 
 - **NOTE**: `lib.ts` is sometimes left unused, so it can always be deleted later on.
