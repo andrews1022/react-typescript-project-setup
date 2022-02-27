@@ -171,22 +171,6 @@ Run this command to remove most files listed above with a ✓:
 - `src/pages/index.js`
 - `src/templates/blog-post.js`
 
-- Also make sure group each component and it's CSS module file together in a folder to keep things a big organized. The file/folder structure will now be:
-
-```
-/components
-  /ArticlePreview
-    - index.js
-    - article-preview.module.css
-  /Container
-    - index.js
-  /Footer
-    - index.js
-    - footer.module.css
-  etc.
-
-```
-
 ### layout.js
 
 Updated code:
@@ -316,11 +300,11 @@ const BlogPostTemplate = ({ data, location }) => {
 ### Uninstalling Some NPM Packages
 
 - We are no longer using any of the following packages:
-- `contentful-import`
-- `gh-pages`
-- `lodash`
-- `netlify-cli`
-  - Uninstall them all by running: `npm un contentful-import gh-pages lodash netlify-cli`.
+  - `contentful-import`
+  - `gh-pages`
+  - `lodash`
+  - `netlify-cli`
+- Uninstall them all by running: `npm un contentful-import gh-pages lodash netlify-cli`.
 - We can also simply our `scripts` in `package.json` to:
 
 ```json
@@ -336,8 +320,8 @@ const BlogPostTemplate = ({ data, location }) => {
 
 ### Organizing Components Into Folders
 
-- First, go into the components folder: `cd src/components/`
-  - We need to create all folders for each component:
+- Go into the components folder: `cd src/components/`
+  - We need to create the folders for each component:
     - ArticlePreview
     - Container
     - Footer
@@ -347,7 +331,7 @@ const BlogPostTemplate = ({ data, location }) => {
     - Seo
     - Tags
   - Create them all at once by running: `mkdir ArticlePreview Container Footer Hero Layout Navigation Seo Tags`
-- Now, one at a time, move the corresponding files into their folders
+- Now, one at a time, move the files into their corresponding folders
   - Hopefully VS Code automatically updates the import path(s) for you
   - If not, you will have to manually update them yourself
 - After moving everything around, you should see the following warning: `warn chunk commons [mini-css-extract-plugin]`
@@ -357,16 +341,13 @@ const BlogPostTemplate = ({ data, location }) => {
 
 ## Converting to TypeScript
 
-- None of Gatsby's starters are fully good-to-go in TypeScript, so we must manually convert all `.js`/`.jsx` files to `.ts`/`.tsx`
-- We also don't get proper type checking. VS Code will highlight the error, but the Gatsby CLI will not.
+- We must manually convert all `.js`/`.jsx` files to `.ts`/`.tsx`
+- We also don't get proper type checking
+  - VS Code will highlight the error, but the Gatsby CLI will not
 - We will update the following to use TypeScript:
   - Components
   - Pages
   - Gatsby API files (gatsby-config, gatsby-node, etc.)
-- Here is a summary of the steps we will take:
-  - Setup `tsconfig.json`
-  - Convert all the components & pages to TypeScript
-  - Convert the Gatsby API files to use TypeScript
 
 ### Setup
 
@@ -392,9 +373,8 @@ const BlogPostTemplate = ({ data, location }) => {
 }
 ```
 
-Next, we need to install `concurrently` which will allow us to run multiple scripts, well, concurrently: `npm i concurrently`
-
-Next, let's update our `scripts` in `package.json` to use `concurrently`:
+- Next, we need to install `concurrently` which will allow us to run multiple scripts, well, concurrently: `npm i concurrently`
+- Then let's update our `scripts` in `package.json` to use `concurrently`:
 
 ```json
 "dev-gatsby": "gatsby develop",
@@ -402,15 +382,12 @@ Next, let's update our `scripts` in `package.json` to use `concurrently`:
 "dev": "npm run clean && concurrently \"npm:dev-gatsby\" \"npm:dev-typescript\""
 ```
 
-At this point, we should run our rebuild script to start fresh: `npm run rebuild`
-
-Now we will also see any type errors in the CLI!
+- Now we will also see any type errors in the CLI
 
 ### Converting Pages
 
-Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home Page.
-
-- Rename from `index.js` to `index.tsx`
+- Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home Page.
+- Rename the file from `index.js` to `index.tsx`
 - When you do that, the TypeScript will complain about a few things:
   - The components you are importing (which we will convert to `.tsx` in a bit anyways, so no worries there)
   - The props `data` & `location` have the any type implicitly
@@ -418,7 +395,12 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
   - A type error for the CSS Modules (since we are replacing them with Styled Components later on, no worries here either)
 - Luckily, Gatsby has types for us, and the one we need for pages is `PageProps`
 
-  - Import it: `import type { PageProps } from 'gatsby'`
+  - Import it:
+
+  ```javascript
+  import type { PageProps } from 'gatsby';
+  ```
+
   - Then set the type of our destructured props to it:
 
   ```javascript
@@ -429,11 +411,23 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
 
 - Next, we'll tackle the types for the GraphQL data
 
-  - Outside the function body, just above, create a new type called `GraphQLResult`: `type GraphQLResult = {};`
+  - Outside the function body, just above, create a new type called `GraphQLResult`:
+
+  ```javascript
+  type GraphQLResult = {};
+
+  const Home = ({ data, location }: PageProps) => {
+  	// ...
+  };
+  ```
+
   - In this, we need to set the types for the data being returned
   - Now would be a good time to create a `types` folder, and inside it a file called `types.ts`
-    - At the top, import the following: `import type { IGatsbyImageData } from 'gatsby-plugin-image';`
-      - We will use this multiple times in this file, and we would get type errors in some files if we didn't
+    - At the top, import the following:
+    ```javascript
+    import type { IGatsbyImageData } from 'gatsby-plugin-image';
+    ```
+    - We will use this multiple times in this file, and we would get type errors in some files if we didn't
   - In `types.ts`, add the following:
 
   ```javascript
@@ -464,7 +458,6 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
   };
   ```
 
-  - These will be our re-usable types throughout the project
   - Back in the `index.tsx`, adjust the `GraphQLResult` type to:
 
   ```javascript
@@ -481,6 +474,15 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
   - Now, we can pass this type in as an additional argument to PageProps:
 
   ```javascript
+  type GraphQLResult = {
+  	allContentfulBlogPost: {
+  		nodes: BlogPost[]
+  	},
+  	allContentfulPerson: {
+  		nodes: Person[]
+  	}
+  };
+
   const Home = ({ data, location }: PageProps<GraphQLResult>) => {
   	// ...
   };
@@ -492,7 +494,10 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
 - For the `blog-post.js` template, however:
 
   - After renaming to `.tsx`, you will get error saying `Module not found`
-  - This is because in `gatsby-node.js`, there is this line: `const blogPost = path.resolve('./src/templates/blog-post.js');`
+  - This is because in `gatsby-node.js`, there is this line:
+    ```javascript
+    const blogPost = path.resolve('./src/templates/blog-post.js');
+    ```
     - Simply change it to `.tsx` at the end
     - Ctrl + C to stop the local dev server (if not already stopped)
     - Start fresh with `npm run rebuild`
@@ -543,6 +548,12 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
   - Then pass it to `PageProps`:
 
   ```javascript
+  type GraphQLResult = {
+  	contentfulBlogPost: SingleBlogPost,
+  	next: NextPrevious,
+  	previous: NextPrevious
+  };
+
   const BlogPostTemplate = ({ data, location }: PageProps<GraphQLResult>) => {
   	// ...
   };
@@ -550,7 +561,7 @@ Now, we can convert the `.js` files to `.tsx` files. Let's start with the Home P
 
 ### Converting Components
 
-Now let's update the components to `.tsx`! The steps are similar to the pages:
+Now let's update the components to `.tsx`
 
 - Rename `index.js` to `index.tsx`
 - Setup type for the props (if any)
