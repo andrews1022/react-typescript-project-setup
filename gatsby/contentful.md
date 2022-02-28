@@ -1,4 +1,4 @@
-# Gatsby Starter - Contentful Blog
+# Gatsby & Contentful
 
 This is my personal approach for generating a project using the [Contentful Blog Gatsby Starter](https://github.com/contentful/starter-gatsby-blog) and update it to:
 

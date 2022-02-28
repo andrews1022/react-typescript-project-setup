@@ -1,4 +1,4 @@
-# Gatsby Starter - Builder.io
+# Gatsby Starter - Builder.io Updated Packages
 
 This is my personal approach for generating a project using the [Builder.io Gatsby Starter](https://github.com/BuilderIO/gatsby-starter-builder) and update it to:
 
@@ -7,289 +7,343 @@ This is my personal approach for generating a project using the [Builder.io Gats
 - Deploy to Netlify
 - Continuous Deployment with Builder.io and Netlify
 
-## Builder.io Setup
+## Simplified Steps
 
-- Create a free account with Builder.io [here](https://builder.io/signup) first if you don't already have one
-- Once in your dashboard, click "Create a new Builder space" and give it a name
-- Optional: Click this [link](https://builder.io/fork-sample-org) to generate some basic starter content for your space
-
-## GitHub Setup
-
-- Create a new repo on GitHub [here](https://github.com/new)
-  - Give it at least a name, then click `Create repository`
-  - Keep this tab open
-- On your local machine, create a directory and then go into it: `mkdir PROJECT_NAME && cd PROJECT_NAME`
-  - Where `PROJECT_NAME` matches the name of the GitHub repo you just created
-- Download the starter: `npx gatsby new . https://github.com/BuilderIO/gatsby-starter-builder`
-- After that is done, open it in VS Code: `code .`
-- Remove git from this project (to start from scratch): `rm -rf .git`
-- Run all the git commands as outlined on the repo page to commit this progress:
+- used pre-existing builder.io space
+- downloaded starter: `npx gatsby new . https://github.com/BuilderIO/gatsby-starter-builder`
+- removed git from the project: `rm -rf .git`
+- removed `.prettierrc`
+- updated api key in `src/config.js`
+- updated `landingPage` to `page` in `gatsby-config.js`
+- updated `RootLayout.jsx` to this:
 
 ```
-git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main
-```
-
-## Update API Keys
-
-- In Builder.io, click on the Account icon on the left sidenav
-- Change the Site URL to `http://localhost:8000` and copy the Public API Key.
-- In your code editor, add the Public API Key you just copied to `src/config.js`:
-
-```
-builderAPIKey: '59bb518773c14842921abe05d5e2bee3' <-- replace this with your API Key
-```
-
-- Commit this progress: `git add . && git commit -m 'updated api key' && git push -u origin main`
-
-## Netlify
-
-### Initial Setup
-
-- Download & install the following packages: `npm i netlify-cli`
-- Authenticate and obtain an access token by running: `npx netlify login`
-- Init a new Netlify site: `npx netlify init`
-  - Select `Create & configure a new site`
-  - Select your team
-  - Give the site a name (or leave blank, as it can always be renamed later)
-  - Choose `Authorize with GitHub through app.netlify.com`
-    - Click Authorize where needed
-    - Any other time this step will be done automatically and the CLI will go directly to the next step
-  - Set `Your build command` to: `npm run build`
-  - Set `Directory to deploy` to: `public`
-  - Leave Netlify functions blank (just hit `Enter`)
-  - Netlify should detect you are using Gatsby, so type `y` to install the `Essential Gatsby plugin`
-  - Select `n` to not add the `netlify.toml` file
-- Go to the Netlify Dashboard [here](https://app.netlify.com/)
-  - Go to Sites and make sure the site was successfully deployed
-  - The build can take a few minutes, so you will have to wait!
-- Commit this progress: `git add . && git commit -m 'setup netlify deployment' && git push -u origin main`
-
-### Continuous Deployment
-
-For continuous deployment between Netlify & Builder.io, we need to do 2 things:
-
-- Create a [build hook](https://docs.netlify.com/configure-builds/build-hooks/) in Netlify
-- Add the build hook from last step to Builder.io global webhooks in your new [space settings](https://builder.io/account/space)
-
-Netlify Build Hook:
-
-- Go to the Netlify Dashboard [here](https://app.netlify.com/)
-- Go to Sites and select your site
-- Go to `Site settings` > `Build & deploy` > `Continuous deployment`, and then scroll down the `Build hooks` section
-- Click `Add build hook`
-  - Give it a name, then click `Save`
-  - Copy the generated URL
-
-Builder.io Space Settings:
-
-- Go to your Builder.io space settings [here](https://builder.io/account/space)
-- Click the pencil icon for Global `webhooks`
-- Click `+ WEBHOOK`
-- Click on `Webhook 1`
-- Paste in the URL
-- Click `Save`
-
-Testing the Hook:
-
-- Go to your Builder.io content [here](https://builder.io/content)
-- Click on `Landing page`, then `Home`
-- Make a simple change to the heading _"We make things great"_, for example
-- Click `PUBLISH UPDATE`
-- Go to the Netlify Dashboard [here](https://app.netlify.com/)
-  - Go to Sites and you should see the site is rebuilding!
-
-## Creating a Custom Code Component
-
-Follow these steps to create a `Code Component`. A `Code Component` is a special type of component for Builder.io, which will allow you, or whomever, is editing the site in the Builder.io UI, to drag and drop into the layout and create dyanmic content for the site. In this example, we'll create a simple HeadingAndCopy component.
-
-### Static
-
-- In src/components, create a new folder: `mkdir HeadingAndCopy`
-- In this folder, create 2 files: `touch HeadingAndCopy.jsx HeadingAndCopy.builder.js`
-  - `HeadingAndCopy.jsx` is where the typical JSX/React component code will go
-  - `HeadingAndCopy.builder.js` is where the Builder.io config will go
-- In `HeadingAndCopy.jsx`, create a simple component to start:
-
-```javascript
 import React from 'react';
+import { Helmet } from 'react-helmet';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { ThemeProvider } from '@material-ui/core/styles';
+import theme from '../theme';
 
-const HeadingAndCopy = () => {
+const RootLayout = ({ children }) => (
+	<>
+		<Helmet>
+			<meta charSet='UTF-8' />
+			<meta name='theme-color' content='#f8f8f8' />
+			<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' />
+			<meta name='mobile-web-app-capable' content='yes' />
+			<meta name='apple-mobile-web-app-capable' content='yes' />
+			<meta httpEquiv='X-UA-Compatible' content='ie=edge' />
+		</Helmet>
+
+		<ThemeProvider theme={theme}>
+			{/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+			<CssBaseline />
+
+			{/* this is where PageLayout.jsx is rendered */}
+			{children}
+		</ThemeProvider>
+	</>
+);
+
+export default RootLayout;
+```
+
+- updated PageLayout.jsx to this:
+
+```
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import '../builder-settings';
+import theme from '../theme';
+
+const useStyles = makeStyles((them) => ({
+	root: {
+		padding: theme.spacing(1)
+	},
+	header: {},
+	footer: {},
+	content: {}
+}));
+
+const PageLayout = ({ children }) => {
+	const classes = useStyles();
+
 	return (
-		<div>
-			<h2>Heading here</h2>
-			<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Repellat, eius.</p>
+		<div className={classes.root}>
+			<div className={classes.header}>
+				<nav>NAV WILL GO HERE</nav>
+			</div>
+
+			{/* this is where LandingPage.jsx is rendered */}
+			<div className={classes.content}>{children}</div>
+
+			<div className={classes.footer}>
+				<footer>FOOTER WILL GO HERE</footer>
+			</div>
 		</div>
 	);
 };
 
-export default HeadingAndCopy;
+export default PageLayout;
+
 ```
 
-- In `HeadingAndCopy.builder.js`, add this starter code:
+- renamed `LandingPage.jsx` to `Page.jsx`, and updated code to this:
 
-```javascript
-import { Builder } from '@builder.io/react';
-import HeadingAndCopy from './HeadingAndCopy';
-
-Builder.registerComponent(HeadingAndCopy, {
-	name: 'Heading and Copy'
-});
 ```
+import React from 'react';
+import { graphql } from 'gatsby';
+import { BuilderComponent } from '@builder.io/react';
+import { Helmet } from 'react-helmet';
+import Link from '../components/Link/Link';
 
-- Finally, go to `src/builder-settings.js` and import the builder file: `import './components/HeadingAndCopy/HeadingAndCopy.builder';`
-- Now when you go to edit a page in Builder.io, you should see this component underneath "Code Components"
-  - Drag and drop it onto the page
+const PageTemplate = ({ data }) => {
+	const defaultDescription = 'Edit this in your entry for a better SEO';
+	const defaultTitle = 'Builder: Drag and Drop Page Building for Any Site';
 
-### Dynamic
+	const models = data?.allBuilderModels;
+	const page = models.page[0]?.content;
 
-Now let's update this HeadingAndCopy component to use dynamic values in the editor
+	return (
+		<>
+			<Helmet>
+				<title>{(page && page.data.title) || defaultTitle}</title>
+				<meta name='description' content={(page && page.data.description) || defaultDescription} />
+			</Helmet>
 
-- In `HeadingAndCopy.builder.js`, we can add `inputs` to our Code component:
+			{/** name of the model is landing page, change it if you decided to build*/}
+			{/* this is where each block is rendered on a given page from the builder.io ui */}
+			<BuilderComponent content={page} model='page' renderLink={Link} />
+		</>
+	);
+};
 
-```javascript
-Builder.registerComponent(HeadingAndCopy, {
-	name: 'Heading and Copy',
-	inputs: [
-		{
-			name: 'title',
-			type: 'string'
-		},
-		{
-			name: 'copy',
-			type: 'string'
+export default PageTemplate;
+
+export const pageQuery = graphql`
+	query($path: String!) {
+		allBuilderModels {
+			page(target: { urlPath: $path }, limit: 1, options: { cachebust: true }) {
+				content
+			}
 		}
-	]
-});
+	}
+`;
 ```
 
-- These inputs will allow the user to dynamically render the same component, but with different values
+- also updated path in gatsby-config to use Page.jsx instead of LandingPage.jsx
+- `npm run dev` and site is up and working!
+- added new hook, useMenu:
 
-- In `HeadingAndCopy.jsx`, let's update the JSX to use these dynamic values
-  - To access the values from these inputs, we take the `name` key from each object in the inputs array and access them via props
-  - So, with this component it will be `props.copy` & `props.title`
-  - We can use destructuring to clean up the code a bit, and have it look like this:
-  ```javascript
-  const HeadingAndCopy = ({ copy, title }) => {
-  	return (
-  		<div>
-  			<h2>{title}</h2>
-  			<p>{copy}</p>
-  		</div>
-  	);
-  };
+```
+import { graphql, useStaticQuery } from 'gatsby';
+
+const useMenu = () => {
+	const menu = useStaticQuery(
+		graphql`
+			query {
+				allBuilderModels {
+					page {
+						id
+						name
+						data {
+							title
+							url
+						}
+					}
+				}
+			}
+		`
+	);
+
+	// return the array of objects
+	return menu.allBuilderModels.page;
+};
+
+export default useMenu;
+```
+
+- added new component, `Navigation.jsx`, which uses `useMenu` hook:
+
+```
+import React from 'react';
+import { Link } from 'gatsby';
+
+// custom hooks
+import useMenu from '../../hooks/useMenu';
+
+const Navigation = () => {
+	const navLinks = useMenu();
+
+	return (
+		<nav>
+			<ul>
+				{navLinks.map((link) => (
+					<li key={link.id}>
+						<Link to={link.data.url}>{link.name}</Link>
+					</li>
+				))}
+			</ul>
+		</nav>
+	);
+};
+
+export default Navigation;
+```
+
+- updated PageLayout.jsx to use it:
+
+```
+<div className={classes.header}>
+  <Navigation />
+</div>
+```
+
+- moved gatsby api files from plugins folder to root level
+  - updated import paths
+  - removed gatsby-plugin-top-layout from plugins array in gatsby-config
+- at this point, included hero builder component was NOT showing up, similar issue to when converting gatsby blog to use builder.io
+- **_VERY IMPORTANT_**
+  - go to your builder [models](https://builder.io/models)
+  - go to page, then change the Editing URL to your localhost
+  - THIS IS WHY YOUR CODE COMPONENTS WILL NOT SHOW UP
+- updating packages from this:
+
+```
+"@builder.io/gatsby": "^1.0.11",
+"@builder.io/react": "^1.1.31",
+"@builder.io/widgets": "^1.2.0",
+"@material-ui/core": "^4.9.7",
+"gatsby": "^2.13.31",
+"gatsby-plugin-material-ui": "^2.1.6",
+"gatsby-plugin-react-helmet": "^3.0.4",
+"react": "^16.8.4",
+"react-dom": "^16.8.4",
+"react-helmet": "^5.2.0",
+"react-parallax": "^3.0.3"
+```
+
+- to this (using latest versions):
+
+```
+"@builder.io/gatsby": "^3.0.0",
+"@builder.io/react": "^1.1.49",
+"@builder.io/widgets": "^1.2.21",
+"@material-ui/core": "^4.12.3",
+"gatsby": "^4.8.1",
+"gatsby-plugin-material-ui": "^4.1.0",
+"gatsby-plugin-react-helmet": "^5.8.0",
+"react": "^17.0.2",
+"react-dom": "^17.0.2",
+"react-helmet": "^6.1.0",
+"react-parallax": "^3.3.0"
+```
+
+- then ran `npm run troubleshoot` to start fresh
+  - all packages downloaded without issue
+  - updated `createMuiTheme` to `createTheme` in `src/theme.js`
+- converting to typescript...
+
+  - IT WORKS!
+  - able to create Copy.tsx and it works just fine
+  - was able to convert useMenu hook to typescript:
+
   ```
-- Now, this component is 100% dynamic!
-- This is a simple example, but your component can truly be **ANYTHING** you can think of!
+  import { graphql, useStaticQuery } from 'gatsby';
 
-### See the Changes
+  type GraphQLResult = {
+    allBuilderModels: {
+      page: {
+        id: string;
+        name: string;
+        data: {
+          title: string;
+          url: string;
+        };
+      }[];
+    };
+  };
 
-To see the changes after clicking `Publish Update` in Builder.io:
+  const useMenu = () => {
+    const menu = useStaticQuery<GraphQLResult>(
+      graphql`
+        query {
+          allBuilderModels {
+            page {
+              id
+              name
+              data {
+                title
+                url
+              }
+            }
+          }
+        }
+      `
+    );
 
-- Locally:
-  - Simply stop the local dev server, then run the command `npm run dev`
-  - This will clear the `.cache` and `public` folders, and start up the local dev server agaub, which gives you the lastest changes from Builder.io
-- Netlify:
+    // return the array of objects
+    return menu.allBuilderModels.page;
+  };
 
-  - Simply commit the changes
-  - When you click `Publish Update`, this _will_ trigger a rebuild on Netlify because of our webhook, but the component will not show up until you commit the changes to GitHub
+  export default useMenu;
+  ```
 
-## Layout Files Explained:
+- update project to use env variables
 
-- PageLayout.jsx
-  - for an example on wrapping your pages with conent from header and footer model entries.
-- RootLayout.jsx
-  - for rendering react-helmet and helmet related data, along with material-ui theme
-- LandingPage.jsx
-  - for using GraphQL to query and render Builder.io components and pages manually in parts of your Gatsby site and content
-- Hierarchy (HTML Simplified):
-  - body
-    - div # \_\_\_gastby
-      - RootLayout
-      - d # gatsby-focus-wrapper
-        - div . makeStyles-root-1
-          - div . makeStyles-header-2
-          - PageLayout
-          - div . makeStyles-content-4
-            - LandingPage
-            - div. builder-component
-              - Deeply nested within (5 levels down), each block is rendered here
-            - LandingPage
-          - PageLayout
-          - div . makeStyles-footer-3
-      - RootLayout
-- Hierarchy (JSX Simplified):
-  - RootLayout
-    - PageLayout
-      - LandingPage
+  - create .env file at root level
 
-## Uninstalling Some NPM Packages
+  ```
+  BUILDER_IO_API_KEY=[BUILDER_IO_PUBLIC_API_KEY_HERE]
+  ```
 
-- Uninstalled these packages:
-  - gh-pages
-  - prettier
-    - Run the command: `npm un gh-pages prettier`
+  - install following packages: `npm i dotenv path`
+  - replace these imports:
 
-## Organizing Components Into Folders
+  ```
+  const path = require('path');
+  const config = require('./src/config');
+  ```
 
-Builder starter already had components in their own folders, which is nice!
+  - with these imports:
 
-## Components & Pages
+  ```
+  const path = require('path');
+  const dotenv = require('dotenv');
 
-Making sure all components/pages follow this structure:
+  dotenv.config();
+  ```
 
-- Components use function expression syntax
-- graphql query is placed BELOW export default of component
-- Destructure props where possible
+  - then update plugin object in gatsby-config:
 
-## Converting to TypeScript
-
-- Looks like Gatsby Version is far out of date, possiblly need to different starter and add in Builder.io instead of using Builder.io starter ?
-
-## Adding ESLint
-
-- Also guessing since things are out-of-date, ESLint can't properly be added either
-- Kept getting rules were not found?
-
-## Add New "Navigation" Model
-
-- Tried creating new `Navigation` model
-  - The idea was that this model would simply allow you to add pages, and you get the data back to create links in the JSX
-- While you can create a data model that returns a list of references to Landing pages, you don't get enough data to use it for anything
-- It return some ids, and other useless data
-- This query works just fine:
-
-```
-query MyQuery {
-  allBuilderModels {
-    landingPage {
-      id
-      name
-      data {
-        title
-        url
+  ```
+  {
+    resolve: '@builder.io/gatsby',
+    options: {
+      publicAPIKey: process.env.BUILDER_IO_API_KEY,
+      templates: {
+        // render every `page` model as a new page using the src/templates/LandingPage.jsx template
+        page: path.resolve('src/templates/Page.jsx')
       }
     }
   }
-}
-```
+  ```
 
-## Removing Pre-Existing Models
+- at this point, while site would load, error would show in console and in builder.io that api key had not been set
+- following documentation [here](https://www.gatsbyjs.com/docs/how-to/local-development/environment-variables/)
 
-- Footer
-  - Builder.io admin
-    - Models, Footer
-    - 3 dots, Delete
-  - Code
-    - PageLayout.tsx, remove from graphql query and removed const variable
-- Header
-  - Same as steps taken for Footer
-  - Extra steps taken:
-    - Return JSX inside of StaticQuery instead, since we are not querying anything anymore
+  - created `.env.development` and `.env.production`
+  - copied and pasted `BUILDER_IO_API_KEY=[BUILDER_IO_PUBLIC_API_KEY_HERE]` into both
+  - updated path and dotenv at the top of gatsby-config to:
 
-## Starter Cleanup
+  ```
+  const path = require('path');
 
-- Update README
-- Update package.json scripts (shorten develop to dev)
-- Uninstall material-ui packages
-- Remove unnecessary files & folders
-- Update builder-io plugin in gatsby-config to use environment variable instead of importing api key
+  require('dotenv').config({
+    path: `.env.${process.env.NODE_ENV}`
+  });
+  ```
+
+- ran `npm run dev` to start up fresh, no more errors!
+  - since we are not accessing this env var in the browser, we did not need to prefix the env var with `GATSBY_`
+- can now delete `src/config.js`, and remove the import line in `src/builder-settings.js`
