@@ -1,4 +1,4 @@
-# Gatsby & Contentful
+# Gatsby Starter - Contentful Blog
 
 This is my personal approach for generating a project using the [Contentful Blog Gatsby Starter](https://github.com/contentful/starter-gatsby-blog) and update it to:
 
@@ -352,6 +352,7 @@ const BlogPostTemplate = ({ data, location }) => {
 ### Setup
 
 - Start by installing typescript: `npm i typescript`
+  - Also install the following @types packages: `npm i @types/node @types/react @types/react-dom @types/react-helmet`
 - Create a tsconfig file: `tsc --init`
 - Select everything in `tsconfig.json`, and replace it with this:
 
@@ -739,7 +740,7 @@ if (!result.data) {
   - `@types/styled-components` is needed since styled-components don't come with types out of the box
 - Open `gatsby-config.js`:
   - In the `plugins` array, add this: `'gatsby-plugin-styled-components',`
-  - Start fresh with: `npm run rebuild`
+  - Start fresh with: `npm run dev`
 
 ### Simple Component Change
 

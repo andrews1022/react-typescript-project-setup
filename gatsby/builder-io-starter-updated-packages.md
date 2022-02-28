@@ -289,7 +289,7 @@ export default Navigation;
   export default useMenu;
   ```
 
-- update project to use env variables
+- update project to use env variables:
 
   - create .env file at root level
 
@@ -347,3 +347,204 @@ export default Navigation;
 - ran `npm run dev` to start up fresh, no more errors!
   - since we are not accessing this env var in the browser, we did not need to prefix the env var with `GATSBY_`
 - can now delete `src/config.js`, and remove the import line in `src/builder-settings.js`
+
+- update project to use styled components:
+
+  - installed the following packages: `npm i babel-plugin-styled-components gatsby-plugin-styled-components styled-components`
+  - added `'gatsby-plugin-styled-components'`, to `plugins` array in `gatsby-config.js`
+  - created new folder `styles` inside `src`
+  - added 2 new files:
+    - GlobalStyle.js
+    - theme.js
+      - command: `touch GlobalStyle.js theme.js`
+  - in theme.js, added this code:
+
+  ```
+  const theme = {
+  	mediaQueries: {
+  		desktopHD: 'only screen and (max-width: 1920px)',
+  		desktopMedium: 'only screen and (max-width: 1680px)',
+  		desktopSmall: 'only screen and (max-width: 1440px)',
+  		laptop: 'only screen and (max-width: 1366px)',
+  		laptopSmall: 'only screen and (max-width: 1280px)',
+  		tabletLandscape: 'only screen and (max-width: 1024px)',
+  		tabletMedium: 'only screen and (max-width: 900px)',
+  		tabletPortrait: 'only screen and (max-width: 768px)',
+  		mobileXLarge: 'only screen and (max-width: 640px)',
+  		mobileLarge: 'only screen and (max-width: 576px)',
+  		mobileMedium: 'only screen and (max-width: 480px)',
+  		mobileSmall: 'only screen and (max-width: 415px)',
+  		mobileXSmall: 'only screen and (max-width: 375px)',
+  		mobileTiny: 'only screen and (max-width: 325px)'
+  	},
+  	shades: {
+  		white: '#fff',
+  		black: '#000'
+  	},
+  	greys: {
+  		// add any greys here
+  	},
+  	colors: {
+  		primary: {
+  			// add primary colors here
+  			lightCoral: '#f08080'
+  		},
+  		secondary: {
+  			// add secondary colors here
+  		}
+  	},
+  	fonts: {
+  		// add font-families here
+  	},
+  	fontWeights: {
+  		thin: 100,
+  		extraLight: 200,
+  		light: 300,
+  		normal: 400,
+  		medium: 500,
+  		semiBold: 600,
+  		bold: 700,
+  		extraBold: 800,
+  		black: 900
+  	},
+  	fontSizes: {
+  		// add font sizes here
+  	}
+  };
+
+  export default theme;
+  ```
+
+  - in GlobalStyle.js added this code:
+
+  ```
+  import { createGlobalStyle } from 'styled-components';
+  import theme from './theme';
+
+  // destructured theme properties
+  const { mediaQueries } = theme;
+
+  const GlobalStyle = createGlobalStyle`
+  	html {
+  		box-sizing: border-box;
+  		font-size: 100%;
+
+  		@media ${mediaQueries.desktopSmall} {
+  			font-size: 87.5%;
+  		}
+  	}
+
+  	body {
+  		/* add custom font-family here */
+  		line-height: 1;
+  	}
+
+  	*,
+  	*::before,
+  	*::after {
+  		box-sizing: inherit;
+  		color: inherit;
+  		font-size: inherit;
+  		-webkit-font-smoothing: antialiased;
+  		margin: 0;
+  		padding: 0;
+  	}
+
+  	button,
+  	input,
+  	textarea {
+  		/* add custom font-family here */
+  	}
+
+  	img,
+  	svg {
+  		border: 0;
+  		display: block;
+  		height: auto;
+  		max-width: 100%;
+  	}
+
+  	a {
+  		&:link,
+  		&:visited {
+  			text-decoration: none;
+  		}
+
+  		@media (hover) {
+  			&:hover,
+  			&:active,
+  			&:focus {
+  				outline: 0;
+  				text-decoration: underline;
+  			}
+  		}
+  	}
+
+  	ol,
+  	ul {
+  		list-style: none;
+  	}
+
+  	blockquote,
+  	q {
+  		quotes: none;
+  	}
+
+  	blockquote:before,
+  	blockquote:after,
+  	q:before,
+  	q:after {
+  		content: '';
+  		content: none;
+  	}
+
+  	table {
+  		border-collapse: collapse;
+  		border-spacing: 0;
+  	}
+
+  	audio,
+  	canvas,
+  	video {
+  		display: inline-block;
+  		max-width: 100%;
+  		zoom: 1;
+  	}
+  `;
+
+  export default GlobalStyle;
+  ```
+
+  - updated RootLayout.jsx to this:
+
+  ```
+  import React from 'react';
+  import { Helmet } from 'react-helmet';
+
+  // styled components
+  import { ThemeProvider } from 'styled-components';
+  import GlobalStyle from '../styles/GlobalStyle';
+  import theme from '../styles/theme';
+
+  const RootLayout = ({ children }) => (
+  	<>
+  		<Helmet>
+  			<meta charSet='UTF-8' />
+  			<meta name='theme-color' content='#f8f8f8' />
+  			<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' />
+  			<meta name='mobile-web-app-capable' content='yes' />
+  			<meta name='apple-mobile-web-app-capable' content='yes' />
+  			<meta httpEquiv='X-UA-Compatible' content='ie=edge' />
+  		</Helmet>
+
+  		<ThemeProvider theme={theme}>
+  			<GlobalStyle />
+
+  			{/* this is where PageLayout.jsx is rendered */}
+  			{children}
+  		</ThemeProvider>
+  	</>
+  );
+
+  export default RootLayout;
+  ```
