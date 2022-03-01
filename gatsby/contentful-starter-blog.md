@@ -643,6 +643,7 @@ To start:
   };
   ```
 
+  - make sure to `gatsby-plugin-typescript` to the array of plugins
   - Lastly, we need to update the `contentfulConfig` object to include this: `host: process.env.CONTENTFUL_HOST`
   - If we don't we get an error down below in the if check because we try to access `contentfulConfig.host`, but host doesn't exist initially in this variable
   - It should look like this:
