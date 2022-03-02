@@ -53,8 +53,7 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
 ## Gatsby Cloud Setup
 
 - Sign up with Gatsby Cloud [here](https://www.gatsbyjs.com/products/cloud/) if you don't already have an account
-- For any subsequent visits, you can go to your Gatsby Cloud Dashboard [here](https://www.gatsbyjs.com/dashboard/)
-
+  - For any subsequent visits, you can go to your Gatsby Cloud Dashboard [here](https://www.gatsbyjs.com/dashboard/)
 - Click `Add a site +`
 - Import from a GitHub repository
   - May need to authorize Gatsby Cloud
@@ -656,7 +655,7 @@ To start:
   };
   ```
 
-Now to update gatsby-node:
+Now to update `gatsby-node`:
 
 - For the `gatsby-node.js` file at the `root` level, we can actually rename it to `.ts`
 - Once you do, select everything and replace it with just this: `export * from "./gatsby/gatsby-node";`
