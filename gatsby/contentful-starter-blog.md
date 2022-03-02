@@ -900,8 +900,8 @@ const Layout = ({ children, location }: LayoutProps) => (
 
 ## Automatic Typing for GraphQL Queries
 
-Installed the following packages: `npm i graphql @graphql-codegen/cli` as per https://www.graphql-code-generator.com/docs/getting-started/installation
-Created `codegen.yml` file at the root level and pasted in this code:
+- Install the following packages: `npm i graphql @graphql-codegen/cli`
+- Created `codegen.yml` file at the root level and pasted in this code:
 
 ```yml
 schema: http://localhost:8000/___graphql
@@ -921,11 +921,10 @@ generates:
         enumValues: 'keep'
 ```
 
-Added this script to package.json: `"types": "graphql-codegen --config codegen.yml"`
-Ran the script: `npm run types` and got big error message
-
-Installed 2 more packages: `npm i @graphql-codegen/typescript @graphql-codegen/typescript-operations`
-Ran the script again and it generated the file!
+- Added this script to package.json: `"types": "graphql-codegen --config codegen.yml"`
+- Ran the script: `npm run types` and got big error message
+- Installed 2 more packages: `npm i @graphql-codegen/typescript @graphql-codegen/typescript-operations`
+- Ran the script again and it generated the file!
 
 ## Done!
 
