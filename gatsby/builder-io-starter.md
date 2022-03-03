@@ -114,12 +114,12 @@ Follow these steps to create a `Code Component`. A `Code Component` is a special
 import React from 'react';
 
 const HeadingAndCopy = () => {
-	return (
-		<div>
-			<h2>Heading here</h2>
-			<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Repellat, eius.</p>
-		</div>
-	);
+  return (
+    <div>
+      <h2>Heading here</h2>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Repellat, eius.</p>
+    </div>
+  );
 };
 
 export default HeadingAndCopy;
@@ -132,7 +132,7 @@ import { Builder } from '@builder.io/react';
 import HeadingAndCopy from './HeadingAndCopy';
 
 Builder.registerComponent(HeadingAndCopy, {
-	name: 'Heading and Copy'
+  name: 'Heading and Copy'
 });
 ```
 
@@ -148,17 +148,17 @@ Now let's update this HeadingAndCopy component to use dynamic values in the edit
 
 ```javascript
 Builder.registerComponent(HeadingAndCopy, {
-	name: 'Heading and Copy',
-	inputs: [
-		{
-			name: 'title',
-			type: 'string'
-		},
-		{
-			name: 'copy',
-			type: 'string'
-		}
-	]
+  name: 'Heading and Copy',
+  inputs: [
+    {
+      name: 'title',
+      type: 'string'
+    },
+    {
+      name: 'copy',
+      type: 'string'
+    }
+  ]
 });
 ```
 
@@ -170,12 +170,12 @@ Builder.registerComponent(HeadingAndCopy, {
   - We can use destructuring to clean up the code a bit, and have it look like this:
   ```javascript
   const HeadingAndCopy = ({ copy, title }) => {
-  	return (
-  		<div>
-  			<h2>{title}</h2>
-  			<p>{copy}</p>
-  		</div>
-  	);
+    return (
+      <div>
+        <h2>{title}</h2>
+        <p>{copy}</p>
+      </div>
+    );
   };
   ```
 - Now, this component is 100% dynamic!

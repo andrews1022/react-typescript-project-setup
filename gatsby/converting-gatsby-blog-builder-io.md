@@ -58,7 +58,7 @@ git init && git add . && git commit -m "project setup" && git branch -M main && 
   const path = require('path');
 
   require('dotenv').config({
-  	path: `.env.${process.env.NODE_ENV}`
+    path: `.env.${process.env.NODE_ENV}`
   });
   ```
 
@@ -116,13 +116,13 @@ import React from 'react';
 import { Link } from 'gatsby';
 
 const RenderLink = (props) => {
-	const internal = props.target !== '_blank' && /^\/(?!\/)/.test(props.href);
+  const internal = props.target !== '_blank' && /^\/(?!\/)/.test(props.href);
 
-	if (internal) {
-		return <Link activeClassName='active-link' to={props.href} {...props} />;
-	}
+  if (internal) {
+    return <Link activeClassName='active-link' to={props.href} {...props} />;
+  }
 
-	return <a {...props} />;
+  return <a {...props} />;
 };
 
 export default RenderLink;
@@ -133,29 +133,29 @@ export default RenderLink;
 - saw that queries could not be in run in non-page files, so moved this query `page.js` template
   ```javascript
   export const pageQuery = graphql`
-  	query ($path: String!) {
-  		allBuilderModels {
-  			page(target: { urlPath: $path }, limit: 1, options: { cachebust: true }) {
-  				content
-  			}
-  		}
-  	}
+    query ($path: String!) {
+      allBuilderModels {
+        page(target: { urlPath: $path }, limit: 1, options: { cachebust: true }) {
+          content
+        }
+      }
+    }
   `;
   ```
 - updated `page.js` to:
 
 ```javascript
 const Page = ({ data }) => {
-	const [page] = data.allBuilderModels.page;
-	const { content } = page;
+  const [page] = data.allBuilderModels.page;
+  const { content } = page;
 
-	return (
-		<Layout>
-			<p>Page Template for Builder.io!!</p>
-			{/* this is where each block is rendered on a given page from the builder.io ui */}
-			<BuilderComponent content={content} name='page' renderLink={RenderLink} />
-		</Layout>
-	);
+  return (
+    <Layout>
+      <p>Page Template for Builder.io!!</p>
+      {/* this is where each block is rendered on a given page from the builder.io ui */}
+      <BuilderComponent content={content} name='page' renderLink={RenderLink} />
+    </Layout>
+  );
 };
 
 export default Page;
@@ -228,23 +228,23 @@ export default Page;
     - replace graphql query with this:
     ```javascript
     const result = await graphql(
-    	`
-    		{
-    			allBuilderModels {
-    				blogPost {
-    					data {
-    						slug
-    					}
-    				}
-    			}
-    		}
-    	`
+      `
+        {
+          allBuilderModels {
+            blogPost {
+              data {
+                slug
+              }
+            }
+          }
+        }
+      `
     );
     ```
     - add this above const posts:
     ```javascript
     if (!result.data) {
-    	throw new Error('Failed to get posts.');
+      throw new Error('Failed to get posts.');
     }
     ```
     - change const posts to this:
@@ -254,16 +254,16 @@ export default Page;
     - change the if (posts.length) check to:
     ```javascript
     if (posts.length > 0) {
-    	posts.forEach((post) => {
-    		createPage({
-    			path: `/blog/${post.data.slug}`,
-    			component: blogPost,
-    			context: {
-    				// data passed to context is available in page queries as graphql variables
-    				slug: post.data.slug
-    			}
-    		});
-    	});
+      posts.forEach((post) => {
+        createPage({
+          path: `/blog/${post.data.slug}`,
+          component: blogPost,
+          context: {
+            // data passed to context is available in page queries as graphql variables
+            slug: post.data.slug
+          }
+        });
+      });
     }
     ```
   - blog-post.js
@@ -272,16 +272,16 @@ export default Page;
 
     ```javascript
     export const pageQuery = graphql`
-    	query ($slug: String!) {
-    		allBuilderModels {
-    			blogPost(target: { urlPath: $slug }, limit: 1, options: { cachebust: true }) {
-    				data {
-    					title
-    					blurb
-    				}
-    			}
-    		}
-    	}
+      query ($slug: String!) {
+        allBuilderModels {
+          blogPost(target: { urlPath: $slug }, limit: 1, options: { cachebust: true }) {
+            data {
+              title
+              blurb
+            }
+          }
+        }
+      }
     `;
     ```
 
@@ -289,21 +289,21 @@ export default Page;
 
     ```javascript
     const BlogPostTemplate = ({ data, location }) => {
-    	const [blogPost] = data.allBuilderModels.blogPost;
-    	const { blurb, title } = blogPost.data;
+      const [blogPost] = data.allBuilderModels.blogPost;
+      const { blurb, title } = blogPost.data;
 
-    	return (
-    		<Layout location={location}>
-    			<Seo title={title} />
+      return (
+        <Layout location={location}>
+          <Seo title={title} />
 
-    			<article>
-    				<h1>{title}</h1>
-    				<p>{blurb}</p>
-    			</article>
+          <article>
+            <h1>{title}</h1>
+            <p>{blurb}</p>
+          </article>
 
-    			<Bio />
-    		</Layout>
-    	);
+          <Bio />
+        </Layout>
+      );
     };
     ```
 
@@ -328,12 +328,12 @@ export default Page;
   import React from 'react';
 
   const HeadingAndCopy = () => {
-  	return (
-  		<div>
-  			<h2>Heading here</h2>
-  			<p>Lorem ipsum dolor sit amet.</p>
-  		</div>
-  	);
+    return (
+      <div>
+        <h2>Heading here</h2>
+        <p>Lorem ipsum dolor sit amet.</p>
+      </div>
+    );
   };
 
   export default HeadingAndCopy;
@@ -351,7 +351,7 @@ export default Page;
 
   ```javascript
   Builder.registerComponent(HeadingAndCopy, {
-  	name: 'Heading and Copy'
+    name: 'Heading and Copy'
   });
   ```
 

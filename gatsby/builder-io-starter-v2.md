@@ -158,19 +158,19 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
 ```json
 {
-	"compilerOptions": {
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"jsx": "react",
-		"module": "commonjs",
-		"noEmit": true,
-		"pretty": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"target": "es5"
-	},
-	"include": ["./src", "gatsby"],
-	"exclude": ["./node_modules", "./public", "./.cache"]
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "module": "commonjs",
+    "noEmit": true,
+    "pretty": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es5"
+  },
+  "include": ["./src", "gatsby"],
+  "exclude": ["./node_modules", "./public", "./.cache"]
 }
 ```
 
