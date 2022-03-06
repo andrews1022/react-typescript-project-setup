@@ -4,14 +4,17 @@ This is my personal approach for generating a project using the [Builder.io Gats
 
 - Use TypeScript
 - Use Styled Components
-- Deploy to Netlify
+- Deployment to Netlify
 - Continuous Deployment with Builder.io and Netlify
 
-## Builder.io Setup
+## Builder.io Setup Pt. 1
 
-- Create a free account with Builder.io [here](https://builder.io/signup) first if you don't already have one
-- Once in your dashboard, click "Create a new Builder space" and give it a name
-- Optional: Click this [link](https://builder.io/fork-sample-org) to generate some basic starter content for your space
+- Go sign up on Builder.io and create an account [here](https://builder.io/signup) if you don't already have one
+  - For any subsequent visits, you can go to your Builder Dashboard [here](https://builder.io/content)
+- Once logged in, select `Create a new Builder space`
+  - Give it a name, then click `Create`
+- In a new tab, go to the GitHub starter page [here](https://github.com/andrews1022/builder-io-gatsby-starter)
+  - Click on this [link](https://builder.io/fork-sample-org) to generate some starting models and content
 
 ## GitHub Setup
 
@@ -29,267 +32,957 @@ This is my personal approach for generating a project using the [Builder.io Gats
 git init && git add . && git commit -m "project setup" && git branch -M main && git remote add origin https://github.com/GITHUB_USERNAME/PROJECT_NAME.git && git push -u origin main
 ```
 
-## Update API Keys
+## Builder.io Setup Pt. 2
 
-- In Builder.io, click on the Account icon on the left sidenav
-- Change the Site URL to `http://localhost:8000` and copy the Public API Key.
-- In your code editor, add the Public API Key you just copied to `src/config.js`:
-
-```
-builderAPIKey: '59bb518773c14842921abe05d5e2bee3' <-- replace this with your API Key
-```
-
-- Commit this progress: `git add . && git commit -m 'updated api key' && git push -u origin main`
+- Go back to your Builder dashboard
+- Go to `Account`, stay on the `Space` tab
+  - Change the `Site URL` to `http://localhost:8000`
+  - Copy the `Public API Key`
+- Go to VS Code
+  - Open the file `src/config.js`
+  - Paste in your API Key
+    - We will update to use Environment Variables shortly
+- Run the command `npm run develop` to check your project boots up ok
 
 ## Netlify
 
 ### Initial Setup
 
-- Download & install the following packages: `npm i netlify-cli`
-- Authenticate and obtain an access token by running: `npx netlify login`
-- Init a new Netlify site: `npx netlify init`
-  - Select `Create & configure a new site`
-  - Select your team
-  - Give the site a name (or leave blank, as it can always be renamed later)
-  - Choose `Authorize with GitHub through app.netlify.com`
-    - Click Authorize where needed
-    - Any other time this step will be done automatically and the CLI will go directly to the next step
-  - Set `Your build command` to: `npm run build`
-  - Set `Directory to deploy` to: `public`
-  - Leave Netlify functions blank (just hit `Enter`)
-  - Netlify should detect you are using Gatsby, so type `y` to install the `Essential Gatsby plugin`
-  - Select `n` to not add the `netlify.toml` file
-- Go to the Netlify Dashboard [here](https://app.netlify.com/)
-  - Go to Sites and make sure the site was successfully deployed
-  - The build can take a few minutes, so you will have to wait!
-- Commit this progress: `git add . && git commit -m 'setup netlify deployment' && git push -u origin main`
+Need to setup through the website UI, as `netlify-cli` package causes Builder.io to fail during schema initialization
+
+- Go to your Netlify Dashboard [here](https://app.netlify.com/)
+- Click Sites, then `Add new site`, then `Import an existing project`
+- Choose `GitHub` as your Git provider
+- Select the repo
+- Netlify should detect it is a Gatsby site
+- Leave settings as-is, then click `Deploy site`
 
 ### Continuous Deployment
 
-For continuous deployment between Netlify & Builder.io, we need to do 2 things:
+**NOTE: Recommended to come back to this step LAST as Builder can eat up your Netlify build minutes pretty quickly**
 
-- Create a [build hook](https://docs.netlify.com/configure-builds/build-hooks/) in Netlify
-- Add the build hook from last step to Builder.io global webhooks in your new [space settings](https://builder.io/account/space)
+- For continuous deployment between Netlify & Builder.io, we need to do 2 things:
+  - Create a [build hook](https://docs.netlify.com/configure-builds/build-hooks/) in Netlify
+  - Add the build hook to Builder.io global webhooks in your [space settings](https://builder.io/account/space)
+- Netlify Build Hook:
+  - Go to the Netlify Dashboard [here](https://app.netlify.com/)
+  - Go to `Sites` and select your site
+  - Go to `Site settings` > `Build & deploy` > `Continuous deployment`, and then scroll down the `Build hooks` section
+  - Click `Add build hook`
+    - Give it a name, then click `Save`
+    - Copy the generated URL
+- Builder.io Space Settings:
+  - Go to your Builder.io space settings [here](https://builder.io/account/space)
+  - Click the pencil icon for Global `webhooks`
+  - Click `+ WEBHOOK`
+  - Click on `Webhook 1`
+  - Paste in the URL
+  - Click `Save`
+- Testing the Hook:
+  - Go to your Builder.io content [here](https://builder.io/content)
+  - Click on `Landing page`, then `Home`
+  - Make a simple change to the heading _"We make things great"_, for example
+  - Click `PUBLISH UPDATE`
+  - Go to the Netlify Dashboard [here](https://app.netlify.com/)
+    - Go to Sites and you should see the site is rebuilding!
 
-Netlify Build Hook:
+## Updating the Starter
 
-- Go to the Netlify Dashboard [here](https://app.netlify.com/)
-- Go to Sites and select your site
-- Go to `Site settings` > `Build & deploy` > `Continuous deployment`, and then scroll down the `Build hooks` section
-- Click `Add build hook`
-  - Give it a name, then click `Save`
-  - Copy the generated URL
+- Delete `.prettierrc` file
+- Update `README`
+- Updating NPM Scripts
+  - Use this:
+  ```
+  "scripts": {
+    "build": "npm run clean && gatsby build",
+    "clean": "gatsby clean",
+    "deploy": "npm run clean && gatsby build --prefix-paths && gh-pages -d public",
+    "dev": "npm run clean && gatsby develop",
+    "troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"
+  }
+  ```
+- Updating NPM Packages
+  - Uninstall some packages we won't be using:
+    - `gh-pages`
+    - `prettier`
+      - Run the command: `npm un gh-pages prettier`
+  - Update NPM packages to these versions (do _**NOT**_ prefix version numbers with `^`):
+  ```
+  "@builder.io/gatsby": "3.0.0",
+  "@builder.io/react": "1.1.49",
+  "@builder.io/widgets": "1.2.21",
+  "@material-ui/core": "4.12.3",
+  "gatsby": "4.8.1",
+  "gatsby-plugin-material-ui": "4.1.0",
+  "gatsby-plugin-react-helmet": "5.8.0",
+  "netlify-cli": "9.10.0",
+  "react": "17.0.2",
+  "react-dom": "17.0.2",
+  "react-helmet": "6.1.0",
+  "react-parallax": "3.3.0"
+  ```
+- Updated `createMuiTheme` to `createTheme` in `src/theme.js` as `createMuiTheme` is now deprecated
+- Run `npm run troubleshoot`
+  - Site should boot up just fine
+- Commit this progress: `git add . && git commit -m 'updated npm packages and scripts' && git push -u origin main`
 
-Builder.io Space Settings:
+## Adjusting the Starter
 
-- Go to your Builder.io space settings [here](https://builder.io/account/space)
-- Click the pencil icon for Global `webhooks`
-- Click `+ WEBHOOK`
-- Click on `Webhook 1`
-- Paste in the URL
-- Click `Save`
+- Move `gatsby-browser.js` & `gatsby-ssr.js` from `plugins/gatsby-plugin-top-layout` to the root level
+  - Make sure the paths for the imports are correct!
+- Delete the `plugins` folder: `rm -rf plugins`
+- Remove `gatsby-plugin-top-layout` from the plugins array in `gatsby-config.js`
 
-Testing the Hook:
+## Converting to TypeScript
 
-- Go to your Builder.io content [here](https://builder.io/content)
-- Click on `Landing page`, then `Home`
-- Make a simple change to the heading _"We make things great"_, for example
-- Click `PUBLISH UPDATE`
-- Go to the Netlify Dashboard [here](https://app.netlify.com/)
-  - Go to Sites and you should see the site is rebuilding!
+### Setup
+
+- Install the following packages:
+  - `concurrently`
+  - `dotenv`
+  - `gatsby-plugin-typescript`
+  - `path`
+  - `ts-node`
+  - `typescript`
+  - `@types/node`
+  - `@types/react`
+  - `@types/react-dom`
+  - `@types/react-helmet`
+    - Run the command:
+    ```
+    npm i concurrently dotenv typescript gatsby-plugin-typescript path ts-node @types/node @types/react @types/react-dom @types/react-helmet
+    ```
+- Add `gatsby-plugin-typescript` to the plugins array in `gatsby-config.ts`
+- Create a tsconfig file: `tsc --init`
+- Select everything in `tsconfig.json`, and replace it with this:
+
+```json
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "module": "commonjs",
+    "noEmit": true,
+    "pretty": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es5"
+  },
+  "include": ["./src", "gatsby"],
+  "exclude": ["./node_modules", "./public", "./.cache"]
+}
+```
+
+- Update our `scripts` in `package.json` to use `concurrently`:
+
+```json
+"dev-gatsby": "gatsby develop",
+"dev-typescript": "tsc -w",
+"dev": "npm run clean && concurrently \"npm:dev-gatsby\" \"npm:dev-typescript\""
+```
+
+- Create `config.ts` inside a `gatsby` folder at the root level: `mkdir gatsby && touch gatsby/config.ts`
+- Might need to run the command in VS Code: `TypeScript: Restart TS Server`
+  - Hit `Ctrl + Shift + P`, then search for the command
+
+### Converting Files Pt. 1
+
+- Gatsby API Files
+
+  - As of [Gatsby v4.8](https://www.gatsbyjs.com/docs/reference/release-notes/v4.8/#support-for-typescript-in-gatsby-browser-and-gatsby-ssr), we can have `gatsby-browser` and `gatsby-ssr` at the root level use `.tsx` without any extra configuration!
+  - `gatsby-browser.tsx` use this code:
+
+  ```
+  import React from 'react';
+  import type { GatsbyBrowser } from 'gatsby';
+
+  // layouts
+  import PageLayout from './src/layouts/PageLayout';
+  import RootLayout from './src/layouts/RootLayout';
+
+  export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({ element }) => (
+    <RootLayout>{element}</RootLayout>
+  );
+
+  export const wrapPageElement: GatsbyBrowser['wrapPageElement'] = ({ element }) => (
+    <PageLayout>{element}</PageLayout>
+  );
+  ```
+
+  - `gatsby-ssr.tsx` use this code:
+
+  ```
+  import React from 'react';
+  import type { GatsbySSR } from 'gatsby';
+
+  // layouts
+  import PageLayout from './src/layouts/PageLayout';
+  import RootLayout from './src/layouts/RootLayout';
+
+  export const wrapRootElement: GatsbySSR['wrapRootElement'] = ({ element }) => (
+    <RootLayout>{element}</RootLayout>
+  );
+
+  export const wrapPageElement: GatsbySSR['wrapPageElement'] = ({ element }) => (
+    <PageLayout>{element}</PageLayout>
+  );
+  ```
+
+  - Copy everything in `gatsby-config.js` into `config.ts` in the `gatsby` folder
+  - Replace everything in `gatsby-config.js` with just these 2 lines:
+
+  ```
+  require('ts-node').register();
+
+  module.exports = require('./gatsby/config');
+  ```
+
+- Src
+
+  - `builder-settings.ts` use this code:
+
+  ```
+  import { builder } from '@builder.io/react';
+
+  // a set of widgets you can use in the editor, optional.
+  import '@builder.io/widgets';
+
+  // Import all custom components so you can use in the builder.io editor here
+  import './components/Hero/Hero.builder';
+
+  import config from './config';
+  builder.init(config.builderAPIKey);
+  ```
+
+  - `config.ts` in `src` folder use this code:
+
+  ```
+  export default {
+    builderAPIKey: 'YOUR_KEY_HERE'
+  };
+  ```
+
+  - `theme.ts`: No changes necessary
+  - `config.ts` in `gatsby` folder use this code:
+
+  ```
+  import dotenv from 'dotenv';
+  import path from 'path';
+
+  import config from '../src/config';
+
+  dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+
+  export default {
+    pathPrefix: '/gatsby-starter-builder',
+    siteMetadata: {
+      title: 'Gatsby + Builder.io Starter',
+      description:
+        'This repo contains an example website that is built with Builder.io, and generate with Gatsby'
+    },
+    plugins: [
+      'gatsby-plugin-typescript',
+      'gatsby-plugin-material-ui',
+      'gatsby-plugin-react-helmet',
+      {
+        resolve: '@builder.io/gatsby',
+        options: {
+          publicAPIKey: config.builderAPIKey,
+          templates: {
+            // render models with their corresponding template file
+            landingPage: path.resolve('src/templates/LandingPage.jsx')
+          }
+        }
+      }
+    ]
+  };
+  ```
+
+- Run `npm run dev` to make sure everything still boots up fine
+- Commit this progress: `git add . && git commit -m 'started converting to typescript' && git push -u origin main`
+
+### Converting Files Pt. 2
+
+- Components
+
+  - Hero
+
+    - Delete `.builder.js`
+    - Use this in Hero.tsx (no need for separate file):
+
+    ```
+    import React from 'react';
+      import { Builder, Image } from '@builder.io/react';
+      import { Parallax, Background } from 'react-parallax';
+      import Button from '@material-ui/core/Button';
+      import Typography from '@material-ui/core/Typography';
+      import Box from '@material-ui/core/Box';
+
+      type HeroProps = {
+        buttonLink: string;
+        buttonText: string;
+        darkMode: boolean;
+        height: number;
+        image: string;
+        parallaxStrength: number;
+        title: string;
+      };
+
+      export const Hero = ({
+        buttonLink,
+        buttonText,
+        darkMode,
+        height,
+        image,
+        parallaxStrength,
+        title
+      }: HeroProps) => {
+        return (
+          <Parallax
+            style={{ height }}
+            blur={{ min: -20, max: 20 }}
+            bgImageAlt={title}
+            strength={parallaxStrength}
+          >
+            <Box
+              style={{ color: darkMode ? 'gray' : 'white' }}
+              textAlign='center'
+              paddingTop={`calc(${height}px/3)`}
+            >
+              <Typography variant='h2'>{title}</Typography>
+              <Button style={{ color: darkMode ? 'gray' : 'white' }} variant='outlined' href={buttonLink}>
+                {buttonText}
+              </Button>
+            </Box>
+            <Background>
+              {/* Builder optimized image with srcset, lazy, etc */}
+              <Image image={image} />
+            </Background>
+          </Parallax>
+        );
+      };
+
+      Builder.registerComponent(Hero, {
+        name: 'Hero',
+        // Optionally give a custom icon (image url - ideally a black on transparent bg svg or png)
+        image:
+          'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fd6d3bc814ffd47b182ec8345cc5438c0',
+        inputs: [
+          {
+            name: 'title',
+            type: 'string',
+            defaultValue: 'Your Title Here'
+          },
+          {
+            name: 'image',
+            type: 'file',
+            allowedFileTypes: ['jpeg', 'jpg', 'png', 'svg'],
+            required: true,
+            defaultValue:
+              'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236'
+          },
+          {
+            name: 'buttonLink',
+            type: 'string',
+            defaultValue: 'https://example.com'
+          },
+          {
+            name: 'buttonText',
+            type: 'string',
+            defaultValue: 'Click'
+          },
+          {
+            name: 'height',
+            type: 'number',
+            defaultValue: 400
+          },
+          {
+            name: 'darkMode',
+            type: 'boolean',
+            defaultValue: false
+          },
+          // `advanced: true` hides this option under the "show advanced" toggle
+          {
+            name: 'parallaxStrength',
+            type: 'number',
+            advanced: true,
+            defaultValue: 400
+          }
+        ]
+      });
+
+    ```
+
+    - Just make sure to update import in `builder-settings.ts`
+
+  - `RenderLink.tsx` use this code:
+
+  ```
+  import React from 'react';
+
+  const RenderLink = (props: any) => {
+    const { href, target } = props;
+
+    const internal = target !== '_blank' && /^\/(?!\/)/.test(href);
+
+    if (internal) {
+      return <a activeClassName='active-link' to={href} {...props} />;
+    }
+
+    return <a {...props} />;
+  };
+
+  export default RenderLink;
+  ```
+
+- Layouts
+
+  - `PageLayout.tsx` use this code:
+
+  ```
+  import React from 'react';
+  import type { ReactNode } from 'react';
+  import { graphql, StaticQuery } from 'gatsby';
+  import { BuilderComponent } from '@builder.io/react';
+  import { makeStyles } from '@material-ui/core/styles';
+  import Link from '../components/Link/Link';
+  import '../builder-settings';
+  import theme from '../theme';
+
+  type PageLayoutProps = {
+    children: ReactNode;
+  };
+
+  const useStyles = makeStyles((them) => ({
+    root: {
+      padding: theme.spacing(1)
+    },
+    header: {},
+    footer: {},
+    content: {}
+  }));
+
+  const PageLayout = ({ children }: PageLayoutProps) => {
+    const classes = useStyles();
+
+    return (
+      <StaticQuery query={query}>
+        {(data) => {
+          const models = data.allBuilderModels;
+          const header = models.header[0].content;
+          const footer = models.footer[0].content;
+
+          return (
+            <div className={classes.root}>
+              <div className={classes.header}>
+                {/* can either use the builder model, or your own <Navigation /> component here */}
+                <BuilderComponent content={header} model='header' renderLink={Link} />
+              </div>
+
+              <div className={classes.content}>{children}</div>
+
+              <div className={classes.footer}>
+                {/* can either use the builder model, or your own <Footer /> component here */}
+                <BuilderComponent content={footer} model='footer' renderLink={Link} />
+              </div>
+            </div>
+          );
+        }}
+      </StaticQuery>
+    );
+  };
+
+  export default PageLayout;
+
+  export const query = graphql`
+    query {
+      allBuilderModels {
+        header(limit: 1, options: { cachebust: true }) {
+          content
+        }
+        footer(limit: 1, options: { cachebust: true }) {
+          content
+        }
+      }
+    }
+  `;
+  ```
+
+  - `RootLayout.tsx` use this code:
+
+  ```
+  import React from 'react';
+  import type { ReactNode } from 'react';
+  import { Helmet } from 'react-helmet';
+  import CssBaseline from '@material-ui/core/CssBaseline';
+  import { ThemeProvider } from '@material-ui/core/styles';
+  import theme from '../theme';
+
+  type RootLayoutProps = {
+    children: ReactNode;
+  };
+
+  const RootLayout = ({ children }: RootLayoutProps) => {
+    return (
+      <>
+        <Helmet>
+          <meta charSet='UTF-8' />
+          <meta name='theme-color' content='#f8f8f8' />
+          <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' />
+          <meta name='mobile-web-app-capable' content='yes' />
+          <meta name='apple-mobile-web-app-capable' content='yes' />
+          <meta httpEquiv='X-UA-Compatible' content='ie=edge' />
+
+          {/* add custom fonts from google fonts, adobe typekit, etc. here */}
+        </Helmet>
+        <ThemeProvider theme={theme}>
+          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+          <CssBaseline />
+
+          {/* this is where PageLayout.tsx is rendered */}
+          {children}
+        </ThemeProvider>
+      </>
+    );
+  };
+
+  export default RootLayout;
+  ```
+
+- Templates
+
+  - `LandingPage.tsx` use this code:
+
+  ```
+  import React from 'react';
+  import { graphql } from 'gatsby';
+  import { BuilderComponent } from '@builder.io/react';
+  import { Helmet } from 'react-helmet';
+  import Link from '../components/Link/Link';
+
+  type LandingPageTemplateProps = {
+    data: any;
+  };
+
+  const LandingPageTemplate = ({ data }: LandingPageTemplateProps) => {
+    const defaultDescription = 'Edit this in your entry for a better SEO';
+    const defaultTitle = 'Builder: Drag and Drop Page Building for Any Site';
+
+    const models = data?.allBuilderModels;
+    const landingPage = models.landingPage[0]?.content;
+
+    return (
+      <>
+        <Helmet>
+          <title>{(landingPage && landingPage.data.title) || defaultTitle}</title>
+          <meta
+            name='description'
+            content={(landingPage && landingPage.data.description) || defaultDescription}
+          />
+        </Helmet>
+
+        {/* this is where each block is rendered on a given page using the 'landing page' model */}
+        <BuilderComponent content={landingPage} model='landing-page' renderLink={Link} />
+      </>
+    );
+  };
+
+  export default LandingPageTemplate;
+
+  export const landingPageQuery = graphql`
+    query ($path: String!) {
+      allBuilderModels {
+        landingPage(target: { urlPath: $path }, limit: 1, options: { cachebust: true }) {
+          content
+        }
+      }
+    }
+  `;
+  ```
+
+  - Also make sure to update `.jsx` to `.tsx` in `@builder.io/gatsby` plugin object in `gatsby/config.ts`
+
+- Run `npm run dev` to make sure everything still boots up fine
+- Commit this progress: `git add . && git commit -m 'finished converting to typescript' && git push -u origin main`
+
+## Using Environment Variables
+
+- Create these 3 `.env` files at the root level: `touch .env.development .env.production .env.sample`
+- Add this to `.gitignore`:
+
+```
+# Environment variables
+.env
+.env.development
+.env.production
+```
+
+- Add this to each .env file just created: `BUILDER_IO_API_KEY=[YOUR_BUILDER_API_KEY_HERE]`
+  - Keep the sample file as it
+  - Grab your public API key from either the Builder admin or from `src/config.ts`
+  - Replace the placeholder in .env.development & .env.production with the key
+- Update plugin object in `gatsby/config.ts`:
+
+```
+{
+  resolve: '@builder.io/gatsby',
+  options: {
+    publicAPIKey: process.env.BUILDER_IO_API_KEY,
+    templates: {
+      // render every `page` model as a new page using the src/templates/LandingPage.jsx template
+      page: path.resolve('src/templates/Page.jsx')
+    }
+  }
+}
+```
+
+- Can now do the following:
+  - Remove the config import in this file now
+  - Delete `src/config.ts`
+  - Remove the config import in `src/builder-settings.ts`
+  - Update builder.init() to: `builder.init(process.env.BUILDER_IO_API_KEY!);`
+- Commit this progress: `git add . && git commit -m 'updated project to use environment variables' && git push -u origin main`
+
+## ESLint Setup
+
+- Start by running: `npx eslint --init`
+- This is how I answer the questions:
+  - How would you like to use ESLint? · `style`
+  - What type of modules does your project use? · `esm`
+  - Which framework does your project use? · `react`
+  - Does your project use TypeScript? · No / `Yes`
+  - Where does your code run? · `browser`, `node`
+  - How would you like to define a style for your project? · `guide`
+  - Which style guide do you want to follow? · `airbnb`
+  - What format do you want your config file to be in? · `JSON`
+- Download any additional packages if prompted
+- Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
+- Commit this progress: `git add . && git commit -m 'updated project to use eslint' && git push -u origin main`
+
+## Styled Components Setup
+
+We will not only add Styled Components, but also remove Material UI (optional)
+
+- Download and install the following packages:
+  - `babel-plugin-styled-components`
+  - `gatsby-plugin-styled-components`
+  - `styled-components`
+  - `@types/styled-components`
+- Run the command: `npm i babel-plugin-styled-components gatsby-plugin-styled-components styled-components @types/styled-components`
+- Add `gatsby-plugin-styled-components` to the `plugins` array in `gatsby/config.ts`
+- Created a new `styles` folder inside `src`
+- In the styles folder, create these 2 new files:
+  - `GlobalStyle.ts`
+  - `theme.ts`
+- In `theme.ts`, add this code:
+
+```
+const theme = {
+  mediaQueries: {
+    desktopHD: 'only screen and (max-width: 1920px)',
+    desktopMedium: 'only screen and (max-width: 1680px)',
+    desktopSmall: 'only screen and (max-width: 1440px)',
+    laptop: 'only screen and (max-width: 1366px)',
+    laptopSmall: 'only screen and (max-width: 1280px)',
+    tabletLandscape: 'only screen and (max-width: 1024px)',
+    tabletMedium: 'only screen and (max-width: 900px)',
+    tabletPortrait: 'only screen and (max-width: 768px)',
+    mobileXLarge: 'only screen and (max-width: 640px)',
+    mobileLarge: 'only screen and (max-width: 576px)',
+    mobileMedium: 'only screen and (max-width: 480px)',
+    mobileSmall: 'only screen and (max-width: 415px)',
+    mobileXSmall: 'only screen and (max-width: 375px)',
+    mobileTiny: 'only screen and (max-width: 325px)'
+  },
+  shades: {
+    white: '#fff',
+    black: '#000'
+  },
+  greys: {
+    // add any greys here
+  },
+  colors: {
+    primary: {
+      // add primary colors here
+      lightCoral: '#f08080'
+    },
+    secondary: {
+      // add secondary colors here
+    }
+  },
+  fonts: {
+    // add font-families here
+  },
+  fontWeights: {
+    thin: 100,
+    extraLight: 200,
+    light: 300,
+    normal: 400,
+    medium: 500,
+    semiBold: 600,
+    bold: 700,
+    extraBold: 800,
+    black: 900
+  },
+  fontSizes: {
+    // add font sizes here
+  }
+};
+
+export default theme;
+```
+
+- In `GlobalStyle.ts` added this code:
+
+```
+import { createGlobalStyle } from 'styled-components';
+import theme from './theme';
+
+// destructured theme properties
+const { mediaQueries } = theme;
+
+const GlobalStyle = createGlobalStyle`
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+
+    @media ${mediaQueries.desktopSmall} {
+      font-size: 87.5%;
+    }
+  }
+
+  body {
+    /* add custom font-family here */
+    line-height: 1;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+    color: inherit;
+    font-size: inherit;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  button,
+  input,
+  textarea {
+    /* add custom font-family here */
+  }
+
+  img,
+  svg {
+    border: 0;
+    display: block;
+    height: auto;
+    max-width: 100%;
+  }
+
+  a {
+    &:link,
+    &:visited {
+      text-decoration: none;
+    }
+
+    @media (hover) {
+      &:hover,
+      &:active,
+      &:focus {
+        outline: 0;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  ol,
+  ul {
+    list-style: none;
+  }
+
+  blockquote,
+  q {
+    quotes: none;
+  }
+
+  blockquote:before,
+  blockquote:after,
+  q:before,
+  q:after {
+    content: '';
+    content: none;
+  }
+
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  audio,
+  canvas,
+  video {
+    display: inline-block;
+    max-width: 100%;
+    zoom: 1;
+  }
+`;
+
+export default GlobalStyle;
+```
+
+- Update `RootLayout.tsx` to this:
+
+```
+import React from 'react';
+import { Helmet } from 'react-helmet';
+import type { ReactNode } from 'react';
+
+// styled components
+import { ThemeProvider } from 'styled-components';
+import GlobalStyle from '../styles/Globalstyle';
+import theme from '../styles/theme';
+
+type RootLayoutProps = {
+  children: ReactNode;
+};
+
+const RootLayout = ({ children }: RootLayoutProps) => (
+  <>
+    <Helmet>
+      <meta charSet='UTF-8' />
+      <meta name='theme-color' content='#f8f8f8' />
+      <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' />
+      <meta name='mobile-web-app-capable' content='yes' />
+      <meta name='apple-mobile-web-app-capable' content='yes' />
+      <meta httpEquiv='X-UA-Compatible' content='ie=edge' />
+
+      {/* add custom fonts from google fonts, adobe typekit, etc. here */}
+    </Helmet>
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+
+      {/* this is where PageLayout.tsx is rendered */}
+      {children}
+    </ThemeProvider>
+  </>
+);
+
+export default RootLayout;
+```
+
+- Delete `src/theme.ts`
+
+- Update PageLayout.tsx to:
+
+```
+import React from 'react';
+import type { ReactNode } from 'react';
+import { graphql, StaticQuery } from 'gatsby';
+import { BuilderComponent } from '@builder.io/react';
+import Link from '../components/Link/Link';
+import '../builder-settings';
+
+type PageLayoutProps = {
+  children: ReactNode;
+};
+
+export const query = graphql`
+  query {
+    allBuilderModels {
+      header(limit: 1, options: { cachebust: true }) {
+        content
+      }
+      footer(limit: 1, options: { cachebust: true }) {
+        content
+      }
+    }
+  }
+`;
+
+const PageLayout = ({ children }: PageLayoutProps) => (
+  <StaticQuery query={query}>
+    {(data) => {
+      const models = data.allBuilderModels;
+      const header = models.header[0].content;
+      const footer = models.footer[0].content;
+
+      return (
+        <div>
+          <div>
+            {/* can either use the Header model, or your own <Navigation /> component here */}
+            <BuilderComponent content={header} model='header' renderLink={Link} />
+          </div>
+
+          {/* this is where LandingPage.tsx is rendered */}
+          <div>{children}</div>
+
+          <div>
+            {/* can either use the Footer model, or your own <Footer /> component here */}
+            <BuilderComponent content={footer} model='footer' renderLink={Link} />
+          </div>
+        </div>
+      );
+    }}
+  </StaticQuery>
+);
+
+export default PageLayout;
+```
+
+- Delete the `Hero` component folder (including both files)
+- Remove the `Hero` import line in `builder-settings.ts`
+- Remove `gatsby-plugin-material-ui` from the plugins array in `gatsby/config.ts`
+- Uninstall the material-ui packages: `npm un @material-ui/core gatsby-plugin-material-ui`
+- Commit this progress: `git add . && git commit -m 'added styled components and removed material-ui' && git push -u origin main`
 
 ## Creating a Custom Code Component
 
-Follow these steps to create a `Code Component`. A `Code Component` is a special type of component for Builder.io, which will allow you, or whomever, is editing the site in the Builder.io UI, to drag and drop into the layout and create dyanmic content for the site. In this example, we'll create a simple HeadingAndCopy component.
+- In `src/components`, create a new folder `Heading`
+- In that file, create `index.tsx`
+- Copy and paste in the following code:
 
-### Static
-
-- In src/components, create a new folder: `mkdir HeadingAndCopy`
-- In this folder, create 2 files: `touch HeadingAndCopy.jsx HeadingAndCopy.builder.js`
-  - `HeadingAndCopy.jsx` is where the typical JSX/React component code will go
-  - `HeadingAndCopy.builder.js` is where the Builder.io config will go
-- In `HeadingAndCopy.jsx`, create a simple component to start:
-
-```javascript
+```
 import React from 'react';
+import { Builder } from '@builder.io/react';
 
-const HeadingAndCopy = () => {
-  return (
-    <div>
-      <h2>Heading here</h2>
-      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Repellat, eius.</p>
-    </div>
-  );
+type HeadingProps = {
+  text: string;
 };
 
-export default HeadingAndCopy;
-```
+const Heading = ({ text }: HeadingProps) => <h2>{text}</h2>;
 
-- In `HeadingAndCopy.builder.js`, add this starter code:
+export default Heading;
 
-```javascript
-import { Builder } from '@builder.io/react';
-import HeadingAndCopy from './HeadingAndCopy';
-
-Builder.registerComponent(HeadingAndCopy, {
-  name: 'Heading and Copy'
-});
-```
-
-- Finally, go to `src/builder-settings.js` and import the builder file: `import './components/HeadingAndCopy/HeadingAndCopy.builder';`
-- Now when you go to edit a page in Builder.io, you should see this component underneath "Code Components"
-  - Drag and drop it onto the page
-
-### Dynamic
-
-Now let's update this HeadingAndCopy component to use dynamic values in the editor
-
-- In `HeadingAndCopy.builder.js`, we can add `inputs` to our Code component:
-
-```javascript
-Builder.registerComponent(HeadingAndCopy, {
-  name: 'Heading and Copy',
+Builder.registerComponent(Heading, {
+  name: 'Heading',
   inputs: [
     {
-      name: 'title',
-      type: 'string'
-    },
-    {
-      name: 'copy',
+      name: 'text',
       type: 'string'
     }
   ]
 });
 ```
 
-- These inputs will allow the user to dynamically render the same component, but with different values
-
-- In `HeadingAndCopy.jsx`, let's update the JSX to use these dynamic values
-  - To access the values from these inputs, we take the `name` key from each object in the inputs array and access them via props
-  - So, with this component it will be `props.copy` & `props.title`
-  - We can use destructuring to clean up the code a bit, and have it look like this:
-  ```javascript
-  const HeadingAndCopy = ({ copy, title }) => {
-    return (
-      <div>
-        <h2>{title}</h2>
-        <p>{copy}</p>
-      </div>
-    );
-  };
-  ```
-- Now, this component is 100% dynamic!
-- This is a simple example, but your component can truly be **ANYTHING** you can think of!
-
-### See the Changes
-
-To see the changes after clicking `Publish Update` in Builder.io:
-
-- Locally:
-  - Simply stop the local dev server, then run the command `npm run dev`
-  - This will clear the `.cache` and `public` folders, and start up the local dev server agaub, which gives you the lastest changes from Builder.io
-- Netlify:
-
-  - Simply commit the changes
-  - When you click `Publish Update`, this _will_ trigger a rebuild on Netlify because of our webhook, but the component will not show up until you commit the changes to GitHub
-
-## Layout Files Explained:
-
-- PageLayout.jsx
-  - for an example on wrapping your pages with conent from header and footer model entries.
-- RootLayout.jsx
-  - for rendering react-helmet and helmet related data, along with material-ui theme
-- LandingPage.jsx
-  - for using GraphQL to query and render Builder.io components and pages manually in parts of your Gatsby site and content
-- Hierarchy (HTML Simplified):
-  - body
-    - div # \_\_\_gastby
-      - RootLayout
-      - d # gatsby-focus-wrapper
-        - div . makeStyles-root-1
-          - div . makeStyles-header-2
-          - PageLayout
-          - div . makeStyles-content-4
-            - LandingPage
-            - div. builder-component
-              - Deeply nested within (5 levels down), each block is rendered here
-            - LandingPage
-          - PageLayout
-          - div . makeStyles-footer-3
-      - RootLayout
-- Hierarchy (JSX Simplified):
-  - RootLayout
-    - PageLayout
-      - LandingPage
-
-## Uninstalling Some NPM Packages
-
-- Uninstalled these packages:
-  - gh-pages
-  - prettier
-    - Run the command: `npm un gh-pages prettier`
-
-## Organizing Components Into Folders
-
-Builder starter already had components in their own folders, which is nice!
-
-## Components & Pages
-
-Making sure all components/pages follow this structure:
-
-- Components use function expression syntax
-- graphql query is placed BELOW export default of component
-- Destructure props where possible
-
-## Converting to TypeScript
-
-- Looks like Gatsby Version is far out of date, possiblly need to different starter and add in Builder.io instead of using Builder.io starter ?
-
-## Adding ESLint
-
-- Also guessing since things are out-of-date, ESLint can't properly be added either
-- Kept getting rules were not found?
-
-## Add New "Navigation" Model
-
-- Tried creating new `Navigation` model
-  - The idea was that this model would simply allow you to add pages, and you get the data back to create links in the JSX
-- While you can create a data model that returns a list of references to Landing pages, you don't get enough data to use it for anything
-- It return some ids, and other useless data
-- This query works just fine:
+- Go to `src/builder-settings.ts` and add this just above builder.init():
 
 ```
-query MyQuery {
-  allBuilderModels {
-    landingPage {
-      id
-      name
-      data {
-        title
-        url
-      }
-    }
-  }
-}
+// Import all custom components so you can use in the builder.io editor here
+import './components/Heading';
 ```
 
-## Removing Pre-Existing Models
+- Go to Builder page editor
+- Should see `Heading` underneath Code Components
+- Add it to the page anywhere, then click `Publish Update`
+- Shut down local dev server, then start it back up again: `npm run dev`
+- Should see the custom `Heading` component on the page (might need to refresh)
 
-- Footer
-  - Builder.io admin
-    - Models, Footer
-    - 3 dots, Delete
-  - Code
-    - PageLayout.tsx, remove from graphql query and removed const variable
-- Header
-  - Same as steps taken for Footer
-  - Extra steps taken:
-    - Return JSX inside of StaticQuery instead, since we are not querying anything anymore
+## Done!
 
-## Starter Cleanup
-
-- Update README
-- Update package.json scripts (shorten develop to dev)
-- Uninstall material-ui packages
-- Remove unnecessary files & folders
-- Update builder-io plugin in gatsby-config to use environment variable instead of importing api key
+- From here:
+  - Build more reusable components for Builder
+  - Create more pages
+- It is up to you!

@@ -375,8 +375,12 @@ const BlogPostTemplate = ({ data, location }) => {
   - `@types/react`
   - `@types/react-dom`
   - `@types/react-helmet`
-    - Run the command:
-      `npm i concurrently dotenv gatsby-plugin-typescript path ts-node typescript @types/node @types/react @types/react-dom @types/react-helmet`
+- Run the command:
+
+```
+npm i concurrently dotenv gatsby-plugin-typescript path ts-node typescript @types/node @types/react @types/react-dom @types/react-helmet
+```
+
 - Create a tsconfig file: `tsc --init`
 - Select everything in `tsconfig.json`, and replace it with this:
 
