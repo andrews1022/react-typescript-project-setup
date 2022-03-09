@@ -89,38 +89,45 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 ## Updating the Starter
 
 - Delete `.prettierrc` file
-- Update `README`
-- Updating NPM Scripts
-  - Use this:
-  ```
-  "scripts": {
-    "build": "npm run clean && gatsby build",
-    "clean": "gatsby clean",
-    "deploy": "npm run clean && gatsby build --prefix-paths && gh-pages -d public",
-    "dev": "npm run clean && gatsby develop",
-    "troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"
-  }
-  ```
-- Updating NPM Packages
-  - Uninstall some packages we won't be using:
-    - `gh-pages`
-    - `prettier`
-      - Run the command: `npm un gh-pages prettier`
-  - Update NPM packages to these versions (do _**NOT**_ prefix version numbers with `^`):
-  ```
-  "@builder.io/gatsby": "3.0.0",
-  "@builder.io/react": "1.1.49",
-  "@builder.io/widgets": "1.2.21",
-  "@material-ui/core": "4.12.3",
-  "gatsby": "4.8.1",
-  "gatsby-plugin-material-ui": "4.1.0",
-  "gatsby-plugin-react-helmet": "5.8.0",
-  "netlify-cli": "9.10.0",
-  "react": "17.0.2",
-  "react-dom": "17.0.2",
-  "react-helmet": "6.1.0",
-  "react-parallax": "3.3.0"
-  ```
+- Update the `README`
+
+### Updating NPM Scripts
+
+- Use this:
+
+```
+"scripts": {
+  "build": "npm run clean && gatsby build",
+  "clean": "gatsby clean",
+  "deploy": "npm run clean && gatsby build --prefix-paths && gh-pages -d public",
+  "dev": "npm run clean && gatsby develop",
+  "troubleshoot": "rm -rf .cache node_modules public package-lock.json && npm i && npm run dev"
+}
+```
+
+### Updating NPM Packages
+
+- Uninstall some packages we won't be using:
+  - `gh-pages`
+  - `prettier`
+    - Run the command: `npm un gh-pages prettier`
+- Update NPM packages to these versions (do _**NOT**_ prefix version numbers with `^`):
+
+```
+"@builder.io/gatsby": "3.0.0",
+"@builder.io/react": "1.1.49",
+"@builder.io/widgets": "1.2.21",
+"@material-ui/core": "4.12.3",
+"gatsby": "4.8.1",
+"gatsby-plugin-material-ui": "4.1.0",
+"gatsby-plugin-react-helmet": "5.8.0",
+"netlify-cli": "9.10.0",
+"react": "17.0.2",
+"react-dom": "17.0.2",
+"react-helmet": "6.1.0",
+"react-parallax": "3.3.0"
+```
+
 - Updated `createMuiTheme` to `createTheme` in `src/theme.js` as `createMuiTheme` is now deprecated
 - Run `npm run troubleshoot`
   - Site should boot up just fine
