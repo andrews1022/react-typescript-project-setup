@@ -23,13 +23,20 @@ List of files/folders and their purpose:
   - this container can be used to run an application or to separate tools, libraries, or runtimes needed for working with a codebase.
   - [source](https://code.visualstudio.com/docs/remote/containers)
 - `.vscode`
+  - settings for the current workspace (project)
+  - [source](https://code.visualstudio.com/docs/getstarted/settings)
 - `node_modules`
+  - contains all npm packages
 - `public`
+  - for public files, such as a `favicon`
 - `src`
+  - also has the following sub folders:
+    - `components`
+    - `routes`
 - `.eslintrc.js`
 - `.gitignore`
 - `.npmignore`
-  - used to keep stuff out of your package
+  - used to keep stuff out of your npm package
   - if there's no `.npmignore` file, but there is a `.gitignore` file, then npm will ignore the stuff matched by the `.gitignore` file
   - [source](https://npm.github.io/publishing-pkgs-docs/publishing/the-npmignore-file.html)
 - `.stylelintrc.js`
