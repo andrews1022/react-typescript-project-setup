@@ -62,37 +62,127 @@ List of files/folders and their purpose:
 - `vite.config.js`
   - vite config file
 
+## Updating
+
+### package.json
+
+- Group all `dependencies` together alphabetically then remove `devDependencies`:
+
+```
+"@headlessui/react": "^1.5.0",
+"@shopify/hydrogen": "^0.12.0",
+"@shopify/prettier-config": "^1.1.2",
+"@shopify/stylelint-plugin": "^10.0.1",
+"@tailwindcss/typography": "^0.5.0",
+"autoprefixer": "^10.4.1",
+"body-parser": "^1.19.1",
+"compression": "^1.7.4",
+"cross-env": "^7.0.3",
+"eslint-plugin-hydrogen": "^0.6.2",
+"eslint": "^7.31.0",
+"graphql-tag": "^2.12.4",
+"npm-run-all": "^4.1.5",
+"path-to-regexp": "^6.2.0",
+"postcss": "^8.4.5",
+"prettier": "^2.3.2",
+"react-dom": "0.0.0-experimental-529dc3ce8-20220124",
+"react": "0.0.0-experimental-529dc3ce8-20220124",
+"serve-static": "^1.14.1",
+"stylelint": "^13.13.0",
+"tailwindcss": "^3.0.0",
+"vite": "^2.8.0"
+```
+
+- Order scripts alphabetically:
+
+```
+"build:client": "vite build --outDir dist/client --manifest",
+"build:server": "vite build --outDir dist/server --ssr @shopify/hydrogen/platforms/node",
+"build:worker": "cross-env WORKER=true vite build --outDir dist/worker --ssr @shopify/hydrogen/platforms/worker-event",
+"build": "yarn build:client && yarn build:server && yarn build:worker",
+"dev": "vite",
+"lint:css": "stylelint ./src/**/*.{css,sass,scss}",
+"lint:js": "eslint --no-error-on-unmatched-pattern --ext .js,.ts,.jsx,.tsx src",
+"lint": "npm-run-all lint:*",
+"preview": "npx @shopify/hydrogen-cli@latest preview",
+"serve": "node --enable-source-maps dist/server"
+```
+
+### Prettier & ESLint
+
+To use your own Prettier settings:
+
+- Remove `"prettier": "@shopify/prettier-config",` from package.json
+  - Remove from dependencies in package.json: `prettier` & `@shopify/prettier-config`
+- Remove stylelint:
+  - Remove from dependencies in package.json: `stylelint` & `@shopify/stylelint-plugin`
+  - Delete `.stylelintrc.js` file at root level
+- Remove `lint` scripts
+- Delete `.eslintrc.js` at root level
+- Remove `eslint` & `eslint-plugin-hydrogen` from dependencies
+
+### Organizing Components
+
+- created 2 folders in components: `client` and `server`
+- moved components into the corresponding folder
+- convert all functions to use function expression syntax
+
 ## TypeScript
 
 This boilerplate project does NOT come with a TypeScript variant. We must manually convert all files to TypeScript.
 
-## Organization
+- Install the following packages:
+  - `typescript`
+  - `@types/node`
+  - `@types/react`
+  - `@types/react-dom`
+- Run the command: `npm i typescript @types/node @types/react @types/react-dom`
 
-- Client and server based components CAN be moved into a corresponding folder
-  - Meaning, in `src/components`, you create 2 folders: `client` and `server`
-  - Move each component into their respective folder
-  - Just have to update all the import paths (typically done automatically with TypeScript, will have to be done manually with JavaScript)
+- Install the following types packages:
+  - `@types/body-parser`
+  - `@types/compression`
+  - `@types/serve-static`
+  - `@types/tailwindcss`
+- Run the command: `npm i @types/body-parser @types/compression @types/serve-static @types/tailwindcss`
 
-## Tailwind
+- Add `tsconfig.json` file: `tsc --init`
+- Copy and paste this code in:
+
+```
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "pretty": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es5"
+  },
+  "include": ["./src"],
+  "exclude": ["./node_modules"]
+}
+```
+
+## ESLint Setup
+
+- Start by running: `npx eslint --init`
+- This is how I answer the questions:
+  - How would you like to use ESLint? · `style`
+  - What type of modules does your project use? · `esm`
+  - Which framework does your project use? · `react`
+  - Does your project use TypeScript? · No / `Yes`
+  - Where does your code run? · `browser`, `node`
+  - How would you like to define a style for your project? · `guide`
+  - Which style guide do you want to follow? · `airbnb`
+  - What format do you want your config file to be in? · `JSON`
+- Download any additional packages if prompted
+- Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
+- Commit this progress: `git add . && git commit -m 'added eslint' && git push -u origin main`
+
+## Replacing Tailwind w/ Styled Components
 
 - Steps to remove Tailwind can be found in the docs [here](https://shopify.dev/custom-storefronts/hydrogen/framework/css-support#remove-tailwind)
-
-## Glossary
-
-- Hydration
-  - When talking about hydration with React specifically, this is referring to `ReactDOM.hydrate()`
-  - ReactDOM.hydrate() is used for when the server renders the whole HTML of a specific page
-  - The HTML is sent to the client, but the page is not responsive
-  - It becomes responsive only after the accompanying functionality is downloaded from the server and the ReactDOM.hydrate() method is called on the load event of the scripts and hooks up the functionality with the rendered markup
-- Middleware
-  - Middleware (in regards to React) allows for side effects to be run without blocking state updates
-- React Server Components (RSC)
-  - RSCs allow developers to build apps that span both the server and client, combining the rich interactivity of client-side apps with the improved performance of traditional server rendering
-  - Great video explaining them [here](https://www.youtube.com/watch?v=DuSa5E-GgwU)
-  - Shopify documentation [here](https://shopify.dev/custom-storefronts/hydrogen/framework/react-server-components) as well
-
-## Updating
-
-### ESLint
-
-### Styled Components
