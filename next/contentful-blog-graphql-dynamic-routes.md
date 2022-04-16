@@ -1,6 +1,6 @@
 # Next
 
-This is my personal approach for generating a project using Next.js, Styled Components, TypeScript, & Contentful w/ GraphQL, and host on Vercel.
+This is my personal approach for generating a Blog using Next.js, Styled Components, TypeScript, & Contentful w/ GraphQL, and host on Vercel, with dyanmic routes and content.
 
 ## Boilerplate
 
