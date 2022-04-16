@@ -284,41 +284,472 @@ This is my personal approach for generating a project using Next.js, Styled Comp
 - Go into `pages/index.tsx` and remove the `.module.css` import and any existing classNames using the module
 - Commit this progress: `git add . && git commit -m 'added styled components and removed default css files & imports' && git push`
 
-## MUI
+## Querying for Contentful Data Using GraphQL
 
-- Install MUI using:
-  - `emotion` engine: `npm i @mui/material @emotion/react @emotion/styled`
-  - `styled-components` engine: `npm i @mui/material @mui/styled-engine-sc styled-components`
-    - Will also need to install the styled-components @types package: `npm i @types/styled-components`
-- Add Roboto font from Google fonts in `pages/_document.tsx`:
+- Use Contentful GraphiQL playground here: `https://graphql.contentful.com/content/v1/spaces/YOUR_SPACE_ID_HERE/explore?access_token=YOUR_ACCESS_TOKEN_HERE`
+  - Just make sure to update the placeholders with your actual Contentful Space ID and Access Token.
+- Recommend install the [`graphql-request`](https://www.npmjs.com/package/graphql-request) package: `npm i graphql-request`
+- Create `.env.local` & `.env.sample` at the root level and add the following to each:
 
-  ```tsx
-  import Document, { Head, Html, Main, NextScript } from 'next/document';
+```
+CONTENTFUL_SPACE_ID=CONTENTFUL_SPACE_ID_HERE
+CONTENTFUL_ACCESS_TOKEN=CONTENTFUL_CONTENT_DELIVERY_API_ACCESS_TOKEN_HERE
+```
 
-  class MyDocument extends Document {
-    render() {
-      return (
-        <Html>
-          <Head>
-            <link rel='preconnect' href='https://fonts.googleapis.com' />
-            <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
-            <link
-              href='https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap'
-              rel='stylesheet'
-            />
-          </Head>
-          <body>
-            <Main />
-            <NextScript />
-          </body>
-        </Html>
-      );
-    }
-  }
+- Just replace the placeholder values with your `Space ID` and `Content Delivery API - Access Token` in `.env.local`
+- To have Next.js load these variables, simply restart the dev server
+  - You should see `info - Loaded env from ...` in the terminal
+- Next we need to whitelist the Contentful domain for Next.js to optimize images. Update next.config.js to this:
 
-  export default MyDocument;
+  ```js
+  /** @type {import('next').NextConfig} */
+  const nextConfig = {
+    images: {
+      domains: ['images.ctfassets.net']
+    },
+    reactStrictMode: true
+  };
+
+  module.exports = nextConfig;
   ```
 
-  - NOTE: Always go to the Google fonts [site](https://fonts.google.com/) and select Roboto in case the `link` code changes
+  - Restart the dev server after this change
 
-- You can also install the MUI Icons package: `npm i @mui/icons-material`
+- In pages/index.tsx, add the following above the Component:
+
+  ```ts
+  export const getStaticProps = async () => {
+    // get contentful data
+    const endpoint = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
+
+    const options = {
+      headers: {
+        authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`
+      }
+    };
+
+    const graphQLClient = new GraphQLClient(endpoint, options);
+
+    const homePageQuery = gql`
+      query HomepageQuery {
+        // query here
+      }
+    `;
+
+    const data: ContentfulResponse = await graphQLClient.request(homePageQuery);
+
+    return {
+      props: {
+        data
+      }
+    };
+  };
+  ```
+
+  - This structure assumes that:
+
+    - You are querying for multiple things
+    - The type ContentfulResponse is just above this function and would look something like this:
+
+    ```ts
+    type ContentfulResponse = {
+      aboutMe: ContentfulAboutMe;
+      hero: ContentfulHero;
+      projectGroup: ContentfulProjectGroup;
+    };
+    ```
+
+- Now update the prop types for the Home page component:
+
+```ts
+type HomeProps = {
+  data: ContentfulResponse;
+};
+
+const Home: NextPage<HomeProps> = ({ data }) => {
+  // ...
+};
+```
+
+- Then pass the data down to components like so:
+
+```jsx
+<Hero contentfulData={data.hero} />
+```
+
+## Querying for Contentful Data Using GraphQL - No Dependencies
+
+We'll perform the same above but using just the Fetch API
+
+```ts
+type ContentfulData = {
+  aboutMe: ContentfulAboutMe;
+  contact: ContentfulContact;
+  hero: ContentfulHero;
+  projectGroup: ContentfulProjectGroup;
+};
+
+type ContentfulResponse = {
+  data: ContentfulData;
+};
+
+// neat trick for getting better formatting inside template string
+const gql = String.raw;
+
+export const getStaticProps = async () => {
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: gql`
+          query HomepageQuery {
+            # query here...
+          }
+        `
+      })
+    }
+  );
+
+  const { data }: ContentfulResponse = await response.json();
+
+  return {
+    props: {
+      data
+    }
+  };
+};
+
+type HomeProps = {
+  data: ContentfulData;
+};
+
+const Home: NextPage<HomeProps> = ({ data, posts }) => {
+  console.log('data: ', data);
+
+  return(
+    // ...
+  );
+};
+```
+
+## Dynamic Routes & Pages
+
+Let's assume we have a content model of `Project` in Contentful and we want to dynamically create individual pages for each.
+
+We'll also assume each `Project` has a `slug` field.
+
+- In the pages folder, create a new project folder
+  - Then in this folder, create a file: `[slug].tsx`
+  - Using the square brackets [ ] with a variable, in this case `slug`, tells Next.js to use Dyanmic Routing and a dynamic routed pages
+- In this file we'll need both `getStaticProps()` and `getStaticPaths()`
+
+  - Start with this empty functions for now:
+
+  ```ts
+  export const getStaticPaths = async () => {
+    return {};
+  };
+
+  export const getStaticProps = async () => {
+    // get contentful data
+
+    return {
+      props: {}
+    };
+  };
+  ```
+
+- Let's update `getStaticPaths()` first:
+
+  - First, let's make our request to Contentful:
+
+  ```ts
+  export const getStaticPaths = async () => {
+    // get contentful data
+    const response = await fetch(
+      `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          query: gql`
+            query ProjectPageQuery {
+              projectCollection {
+                items {
+                  slug
+                }
+              }
+            }
+          `
+        })
+      }
+    );
+
+    const { data }: ContentfulResponse = await response.json();
+
+    return {};
+  };
+  ```
+
+  - Here, we only need to retrieve the slug
+
+  - Next, we want to create an array of objects with the following structure:
+
+  ```ts
+  {
+    params: {
+      [KEY]: [VALUE]
+    }
+  }
+  ```
+
+  - Here, `[KEY]` should be the same value as inside your `[ ]` for the file name.
+    - In this case, that would be `slug`
+  - And [VALUE] should be the `slug` from Contentful
+  - So, we can map over our data, and return an array objects that looks like this:
+
+  ```ts
+  const slugs = data.projectCollection.items.map((item) => ({ params: { slug: item.slug } }));
+  ```
+
+  - Finally, in the return for `getStaticPaths()`, we want to return an object with at least these 2 properties: `paths` and `fallback`:
+
+  ```ts
+  return {
+    paths: slugs,
+    fallback: false // show 404 page
+  };
+  ```
+
+  - Here, we set `paths` to our `slugs` array
+  - And we set `fallback` to `false`. Setting it to `false` will simply show a 404 page instead if the `slug` is incorrect
+    - Docs on `getStaticPaths()` [here](https://nextjs.org/docs/basic-features/data-fetching/get-static-paths)
+
+- Now lets's update `getStaticProps()`:
+
+  - First, `getStaticProps()` can actually receive a destructured `{ params }` object:
+
+    ```ts
+    export const getStaticProps = async ({ params }: any) => {
+      // get contentful data
+
+      return {
+        props: {}
+      };
+    };
+    ```
+
+    - We'll update the type of `any` on the `params` in a moment
+
+  - Now we can access `params.slug `like so:
+
+  ```ts
+  export const getStaticProps = async ({ params }: any) => {
+    // get contentful data
+    const { slug } = params;
+
+    return {
+      props: {}
+    };
+  };
+  ```
+
+  - Now we need to create a GraphQL query where we query for a single project by it's `slug`. We do so on the `collection`, _not_ on a single project, like so (also good idea to set limit to 1 just in case):
+
+  ```ts
+  query SingleProjectQuery {
+    projectCollection(where: { slug: "SLUG_HERE" }, limit: 1) {
+      items {
+        title
+      }
+    }
+  }
+  ```
+
+  - Now `getStaticProps()` should look like this:
+
+  ```ts
+  export const getStaticProps = async ({ params }: any) => {
+    // get contentful data
+    const { slug } = params;
+
+    // get contentful data
+    const response = await fetch(
+      `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          query: gql`
+            query SingleProjectQuery {
+              projectCollection(where: { slug: "prenuvo" }, limit: 1) {
+                items {
+                  title
+                }
+              }
+            }
+          `
+        })
+      }
+    );
+
+    const { data }: ContentfulPropsResponse = await response.json();
+
+    return {
+      props: {
+        data
+      }
+    };
+  };
+  ```
+
+  - Now let's update the query to use GraphQL variables:
+
+  ```ts
+  type ContentfulPropsResponse = {
+    data: {
+      projectCollection: {
+        items: {
+          title: string;
+        }[];
+      };
+    };
+  };
+
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        query: gql`
+          query SingleProjectQuery($slug: String!) {
+            projectCollection(where: { slug: $slug }, limit: 1) {
+              items {
+                title
+              }
+            }
+          }
+        `,
+        variables: {
+          slug
+        }
+      })
+    }
+  );
+
+  const { data }: ContentfulPropsResponse = await response.json();
+  ```
+
+  - Now we can be clever and destructure the one and only project in array and return that via props:
+
+  ```ts
+  const [projectData] = data.projectCollection.items;
+
+  return {
+    props: {
+      projectData
+    }
+  };
+  ```
+
+  - And finally, we can access this projectData prop in your component and display the project title dynamically like so:
+
+  ```ts
+  type ProjectPageProps = {
+    projectData: {
+      title: string;
+    };
+  };
+
+  const ProjectPage: NextPage<ProjectPageProps> = ({ projectData }) => (
+    <div>
+      <Head>
+        <title>{projectData.title} | Andrew Shearer Dev Portfolio</title>
+        <meta name='description' content={projectData.title} />
+      </Head>
+
+      <h2>Project Page</h2>
+
+      <p>
+        This is the project page for <strong>{projectData.title}</strong>
+      </p>
+    </div>
+  );
+
+  export default ProjectPage;
+  ```
+
+  - You can see we also use the `<Head />` component from Next to dynamically set the title and meta description of the page for SEO purposes
+
+- Now let's update the types for the 2 getStatic functions
+
+  - Thankfully, Next gives us the types `GetStaticPaths` & `GetStaticProps`
+  - We can add these to our import like so:
+
+  ```ts
+  import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+  ```
+
+  - We can set the type of getStaticPaths() to GetStaticPaths, and do the same for getStaticProps with its respective type:
+
+  ```ts
+  export const getStaticPaths: GetStaticPaths = async () => {
+    // ...
+  };
+
+  export const getStaticProps: GetStaticProps = async ({ params }) => {
+    // ...
+  };
+  ```
+
+  - However, after doing this, you'll see a type error here in `getStaticProps()`:
+
+  ```ts
+  export const getStaticProps: GetStaticProps = async ({ params }) => {
+    // Property 'slug' does not exist on type 'ParsedUrlQuery | undefined'
+    const { slug } = params;
+  };
+  ```
+
+  - Note the first line of the `getStaticProps`. Here we are attempting to access the `slug` variable that was created in `getStaticPaths` and returned inside the `params` object. This is the line that causes the error as `params` has the type `ParsedUrlQuery | undefined` and `slug` does not exist in `ParsedUrlQuery`:
+    - `const { slug } = params`
+  - To fix this, simply create an interface that extends `ParsedUrlQuery` and contains a `slug` property:
+
+  ```ts
+  interface IParams extends ParsedUrlQuery {
+    slug: string;
+  }
+  ```
+
+  - Side note, if you wish to extend an interface to a type, you can do so like this:
+
+  ```ts
+  type IParams = ParsedUrlQuery & {
+    slug: string;
+  };
+  ```
+
+  - Examples can be seen [here](https://stackoverflow.com/questions/37233735/interfaces-vs-types-in-typescript#answer-52682220)
+
+  - Then import ParsedUrlQuery from `querystring`:
+
+  ```ts
+  import type { ParsedUrlQuery } from 'querystring';
+  ```
+
+  - This solution was found [here](https://wallis.dev/blog/nextjs-getstaticprops-and-getstaticpaths-with-typescript)
