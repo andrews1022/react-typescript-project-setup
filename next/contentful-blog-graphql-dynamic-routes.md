@@ -11,6 +11,21 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
 - Quickly go through each file and format on save with Prettier.
 - Commit this progress: `git add . && git commit -m 'project setup' && git push -u origin main`
 
+## Contentful Setup
+
+- Login to Contentful [here](https://be.contentful.com/login)
+- Create an `Author` Content Model with the following fields:
+  - Name (Entry title)
+  - Bio
+  - Image
+- Create a Blog Post Model with the following fields:
+  - Title
+  - Slug (short text, slug, and base off entry title)
+  - Image (used for preview card and hero)
+  - Content (Markdown text box)
+  - Author (reference to Author Model)
+- Create some dummy Blog posts, or real ones, whichever you prefer
+
 ## Custom ESLint
 
 - Remove current `.eslintrc.json` and uninstall existing ESLint packages: `rm .eslintrc.json && npm un eslint eslint-config-next`
@@ -20,7 +35,6 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
   - ESLint may not be applying yet, so might have to close and reopen in VS Code
   - Get rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
   - Make sure to add `"plugin:@typescript-eslint/recommended"` to `"extends"` array
-  - Will need to import React at the top of existing files
 - You can add on these 2 rules if you are using React v17 or later:
 
 ```json
@@ -29,6 +43,83 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
 ```
 
 - Commit this progress: `git commit -am 'added custom eslint rules' && git push`
+
+## Basic Components
+
+Here we'll setup a few very basic Layout based components:
+
+- Footer
+- Nav
+- Layout
+  - Run the command: `cd components && touch Footer.tsx Nav.tsx Layout.tsx && cd ..`
+
+Footer.tsx:
+
+```tsx
+const Footer = () => (
+  <footer style={{ backgroundColor: 'lightblue' }}>
+    <p>
+      &copy; {new Date().getFullYear()} all rights reserved <span> | </span> designed and built by
+      andrew shearer
+    </p>
+  </footer>
+);
+
+export default Footer;
+```
+
+Nav.tsx:
+
+```tsx
+import Link from 'next/link';
+
+const Nav = () => (
+  <header style={{ backgroundColor: 'lightcoral' }}>
+    <strong style={{ marginRight: '2rem' }}>Contentful Next.js Blog</strong>
+
+    <Link href='/'>
+      <button type='button'>Go Back Home</button>
+    </Link>
+  </header>
+);
+
+export default Nav;
+```
+
+Layout.tsx:
+
+```ts
+import Head from 'next/head';
+import type { ReactNode } from 'react';
+import Footer from './Footer';
+import Nav from './Nav';
+
+type LayoutProps = {
+  children: ReactNode;
+};
+
+const Layout = ({ children }: LayoutProps) => (
+  <div className='layout-wrapper'>
+    <Head>
+      <title>Andrew Shearer Dev Portfolio</title>
+      <meta name='description' content="Andrew Shearer's front end developer portfolio" />
+      <link rel='icon' href='/favicon.ico' />
+    </Head>
+
+    <Nav />
+
+    <main>{children}</main>
+
+    <Footer />
+  </div>
+);
+
+export default Layout;
+```
+
+Also in the Layout component, we've moved the `<Head>` from pages/index.tsx to here. This way the Head will be the same on all pages.
+
+You can also update it to take a `title` prop of type string and pass in a dynamic value for dynamic pages or hard coded value on pages like an About Us or Contact Us page.
 
 ## Styled Components
 
@@ -216,11 +307,11 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
   export default MyApp;
   ```
 
-  - If you don't have a `Layout` component yet, just replace with an empty `fragment` for now
   - Hit `Ctrl + .` on any of the red underlined code and select `Add all missing imports`
 
 - Remove the `.css` import from `_app.tsx` as well
-- Setup server-side rendered styles to the head
+
+- We need to setup server-side rendered styles to the head
 
   - Create a file `_document.tsx` in the `pages` folder
   - Run the command: `cd pages && touch _document.tsx && cd ..`
@@ -284,22 +375,66 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
 - Go into `pages/index.tsx` and remove the `.module.css` import and any existing classNames using the module
 - Commit this progress: `git add . && git commit -m 'added styled components and removed default css files & imports' && git push`
 
-## Querying for Contentful Data Using GraphQL
+## Basic Custom Types
+
+We'll create some reusable custom types so we can type our data from Contentful and get nice type checking for our components
+
+- Create a `types` folder: `mkdir types`
+- Go into this folder and create a `contentful.ts` file: `cd types && touch contentful.ts && cd ..`
+- In that file, add the following:
+
+```ts
+// reusable
+export type ContentfulImage = {
+  description: string;
+  height: number;
+  sys: {
+    id: string;
+  };
+  url: string;
+  width: number;
+};
+
+// sections
+export type ContentfulAuthor = {
+  bio: string;
+  image: ContentfulImage;
+  name: string;
+};
+
+export type ContentfulBlogPost = {
+  author: ContentfulAuthor;
+  content: string;
+  image: ContentfulImage;
+  slug: string;
+  sys: {
+    id: string;
+  };
+  title: string;
+};
+```
+
+## Querying for Contentful Data Using GraphQL - `graphql-request`
 
 - Use Contentful GraphiQL playground here: `https://graphql.contentful.com/content/v1/spaces/YOUR_SPACE_ID_HERE/explore?access_token=YOUR_ACCESS_TOKEN_HERE`
   - Just make sure to update the placeholders with your actual Contentful Space ID and Access Token.
-- Recommend install the [`graphql-request`](https://www.npmjs.com/package/graphql-request) package: `npm i graphql-request`
-- Create `.env.local` & `.env.sample` at the root level and add the following to each:
+- You can install the [`graphql-request`](https://www.npmjs.com/package/graphql-request) package: `npm i graphql-request`
+- Create `.env.local` & `.env.sample` at the root level: `touch .env.local .env.sample`
 
-```
-CONTENTFUL_SPACE_ID=CONTENTFUL_SPACE_ID_HERE
-CONTENTFUL_ACCESS_TOKEN=CONTENTFUL_CONTENT_DELIVERY_API_ACCESS_TOKEN_HERE
-```
+  - Add the following to each:
 
-- Just replace the placeholder values with your `Space ID` and `Content Delivery API - Access Token` in `.env.local`
+  ```
+  CONTENTFUL_SPACE_ID=CONTENTFUL_SPACE_ID_HERE
+  CONTENTFUL_ACCESS_TOKEN=CONTENTFUL_CONTENT_DELIVERY_API_ACCESS_TOKEN_HERE
+  ```
+
+  - Just replace the placeholder values with your `Space ID` and `Content Delivery API - Access Token` in `.env.local`
+
 - To have Next.js load these variables, simply restart the dev server
+
   - You should see `info - Loaded env from ...` in the terminal
-- Next we need to whitelist the Contentful domain for Next.js to optimize images. Update next.config.js to this:
+
+- Next we need to whitelist the Contentful domain for Next.js to optimize images. Update `next.config.js` to this:
 
   ```js
   /** @type {import('next').NextConfig} */
@@ -313,9 +448,9 @@ CONTENTFUL_ACCESS_TOKEN=CONTENTFUL_CONTENT_DELIVERY_API_ACCESS_TOKEN_HERE
   module.exports = nextConfig;
   ```
 
-  - Restart the dev server after this change
+  - Restart the dev server after making this change
 
-- In pages/index.tsx, add the following above the Component:
+- In `pages/index.tsx`, add the following above the Component:
 
   ```ts
   export const getStaticProps = async () => {
@@ -349,17 +484,19 @@ CONTENTFUL_ACCESS_TOKEN=CONTENTFUL_CONTENT_DELIVERY_API_ACCESS_TOKEN_HERE
   - This structure assumes that:
 
     - You are querying for multiple things
-    - The type ContentfulResponse is just above this function and would look something like this:
+    - The type `ContentfulResponse` is just above this function and would look something like this:
 
     ```ts
     type ContentfulResponse = {
-      aboutMe: ContentfulAboutMe;
-      hero: ContentfulHero;
-      projectGroup: ContentfulProjectGroup;
+      data: {
+        blogPostCollection: {
+          items: ContentfulBlogPost[];
+        };
+      };
     };
     ```
 
-- Now update the prop types for the Home page component:
+- Now update the `prop` types for the `Home` page component:
 
 ```ts
 type HomeProps = {
@@ -374,23 +511,20 @@ const Home: NextPage<HomeProps> = ({ data }) => {
 - Then pass the data down to components like so:
 
 ```jsx
-<Hero contentfulData={data.hero} />
+<BlogPosts contentfulData={data.blogPostCollection.items} />
 ```
 
 ## Querying for Contentful Data Using GraphQL - No Dependencies
 
-We'll perform the same above but using just the Fetch API
+We'll perform the same above but using just the Fetch API. This way we don't introduce any extra packages.
 
 ```ts
-type ContentfulData = {
-  aboutMe: ContentfulAboutMe;
-  contact: ContentfulContact;
-  hero: ContentfulHero;
-  projectGroup: ContentfulProjectGroup;
-};
-
 type ContentfulResponse = {
-  data: ContentfulData;
+  data: {
+    blogPostCollection: {
+      items: ContentfulBlogPost[];
+    };
+  };
 };
 
 // neat trick for getting better formatting inside template string
@@ -425,27 +559,71 @@ export const getStaticProps = async () => {
 };
 
 type HomeProps = {
-  data: ContentfulData;
+  data: ContentfulResponse;
 };
 
 const Home: NextPage<HomeProps> = ({ data, posts }) => {
   console.log('data: ', data);
 
-  return(
-    // ...
-  );
+  return <BlogPosts contentfulData={data.blogPostCollection.items} />;
 };
 ```
 
+## BlogPosts Component
+
+We don't have a BlogPosts component, so let's create it quickly:
+
+- Create the file: `cd components && touch BlogPosts.tsx && cd ..`
+- In this file, add the following:
+
+```ts
+import Link from 'next/link';
+
+// custom types
+import type { ContentfulBlogPost } from '../types/contentful';
+
+type BlogPostsProps = {
+  contentfulData: ContentfulBlogPost[];
+};
+
+// destructure and rename to posts
+const BlogPosts = ({ contentfulData: posts }: BlogPostsProps) => {
+  console.log('posts: ', posts);
+
+  return (
+    <div>
+      <h2>Blog Posts</h2>
+
+      {posts.map((post) => (
+        <div key={post.sys.id}>
+          <h3>{post.title}</h3>
+          <p>
+            View post{' '}
+            <button style={{ color: 'blue' }} type='button'>
+              <Link href={`/blog/${post.slug}`}>here</Link>
+            </button>
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default BlogPosts;
+```
+
+Now we can click on the `here` button to take us to the individual blog post.
+
 ## Dynamic Routes & Pages
 
-Let's assume we have a content model of `Project` in Contentful and we want to dynamically create individual pages for each.
+Now we want to create the dynamic routes & page template for our Blog Posts.
 
-We'll also assume each `Project` has a `slug` field.
+- In the pages folder, create a new `blog` folder
 
-- In the pages folder, create a new project folder
-  - Then in this folder, create a file: `[slug].tsx`
+  - Then in this `blog` folder, create a file: `[slug].tsx`
   - Using the square brackets [ ] with a variable, in this case `slug`, tells Next.js to use Dyanmic Routing and a dynamic routed pages
+  - Run the command: `cd pages && mkdir blog && cd blog && touch [slug].tsx && cd .. && cd ..`
+
 - In this file we'll need both `getStaticProps()` and `getStaticPaths()`
 
   - Start with this empty functions for now:
@@ -466,7 +644,7 @@ We'll also assume each `Project` has a `slug` field.
 
 - Let's update `getStaticPaths()` first:
 
-  - First, let's make our request to Contentful:
+  - First, let's make our request to Contentful. Here we will request all the blog posts and grab just the `slugs`:
 
   ```ts
   export const getStaticPaths = async () => {
@@ -481,8 +659,8 @@ We'll also assume each `Project` has a `slug` field.
         method: 'POST',
         body: JSON.stringify({
           query: gql`
-            query ProjectPageQuery {
-              projectCollection {
+            query BlogPostSlugsQuery {
+              blogPostCollection {
                 items {
                   slug
                 }
@@ -499,8 +677,6 @@ We'll also assume each `Project` has a `slug` field.
   };
   ```
 
-  - Here, we only need to retrieve the slug
-
   - Next, we want to create an array of objects with the following structure:
 
   ```ts
@@ -511,13 +687,13 @@ We'll also assume each `Project` has a `slug` field.
   }
   ```
 
-  - Here, `[KEY]` should be the same value as inside your `[ ]` for the file name.
-    - In this case, that would be `slug`
-  - And [VALUE] should be the `slug` from Contentful
-  - So, we can map over our data, and return an array objects that looks like this:
+  - Here, `[KEY]` should be the same value as inside your `[ ]` for the file name. In this case, that would be `slug`
+  - And `[VALUE]` should be the `slug` from Contentful
+    - NOTE: This structure _**MUST**_ be followed
+  - So, we can `map` over our data, and return an array objects that looks like this:
 
   ```ts
-  const slugs = data.projectCollection.items.map((item) => ({ params: { slug: item.slug } }));
+  const slugs = data.blogPostCollection.items.map((item) => ({ params: { slug: item.slug } }));
   ```
 
   - Finally, in the return for `getStaticPaths()`, we want to return an object with at least these 2 properties: `paths` and `fallback`:
@@ -529,8 +705,8 @@ We'll also assume each `Project` has a `slug` field.
   };
   ```
 
-  - Here, we set `paths` to our `slugs` array
-  - And we set `fallback` to `false`. Setting it to `false` will simply show a 404 page instead if the `slug` is incorrect
+  - Here, we set `paths` to our `slugs` array and we set `fallback` to `false`
+    - Setting it to `false` will simply show a 404 page instead if the `slug` is incorrect
     - Docs on `getStaticPaths()` [here](https://nextjs.org/docs/basic-features/data-fetching/get-static-paths)
 
 - Now lets's update `getStaticProps()`:
@@ -562,11 +738,11 @@ We'll also assume each `Project` has a `slug` field.
   };
   ```
 
-  - Now we need to create a GraphQL query where we query for a single project by it's `slug`. We do so on the `collection`, _not_ on a single project, like so (also good idea to set limit to 1 just in case):
+  - Now we need to create a GraphQL query where we query for a single blog post by it's `slug`. We do so on the `collection`, _not_ on a single blog post, like so (also good idea to set limit to 1 just in case):
 
   ```ts
-  query SingleProjectQuery {
-    projectCollection(where: { slug: "SLUG_HERE" }, limit: 1) {
+  query SingleBlogPostQuery {
+    blogPostCollection(where: { slug: "SLUG_HERE" }, limit: 1) {
       items {
         title
       }
@@ -574,7 +750,7 @@ We'll also assume each `Project` has a `slug` field.
   }
   ```
 
-  - Now `getStaticProps()` should look like this:
+  - Now `getStaticProps()` should look like this (we'll fetch just the `title` for now):
 
   ```ts
   export const getStaticProps = async ({ params }: any) => {
@@ -592,8 +768,8 @@ We'll also assume each `Project` has a `slug` field.
         method: 'POST',
         body: JSON.stringify({
           query: gql`
-            query SingleProjectQuery {
-              projectCollection(where: { slug: "prenuvo" }, limit: 1) {
+            query SingleBlogPostQuery {
+              blogPostCollection(where: { slug: "prenuvo" }, limit: 1) {
                 items {
                   title
                 }
@@ -619,7 +795,7 @@ We'll also assume each `Project` has a `slug` field.
   ```ts
   type ContentfulPropsResponse = {
     data: {
-      projectCollection: {
+      blogPostCollection: {
         items: {
           title: string;
         }[];
@@ -637,9 +813,32 @@ We'll also assume each `Project` has a `slug` field.
       method: 'POST',
       body: JSON.stringify({
         query: gql`
-          query SingleProjectQuery($slug: String!) {
-            projectCollection(where: { slug: $slug }, limit: 1) {
+          query SingleBlogPostQuery($slug: String!) {
+            blogPostCollection(where: { slug: $slug }, limit: 1) {
               items {
+                author {
+                  bio
+                  image {
+                    description
+                    height
+                    sys {
+                      id
+                    }
+                    url
+                    width
+                  }
+                  name
+                }
+                content
+                image {
+                  description
+                  height
+                  sys {
+                    id
+                  }
+                  url
+                  width
+                }
                 title
               }
             }
@@ -655,101 +854,103 @@ We'll also assume each `Project` has a `slug` field.
   const { data }: ContentfulPropsResponse = await response.json();
   ```
 
-  - Now we can be clever and destructure the one and only project in array and return that via props:
+  - Now we can be clever and destructure the one and only blog post in array and return that via props:
 
   ```ts
-  const [projectData] = data.projectCollection.items;
+  const [blogPostData] = data.blogPostCollection.items;
 
   return {
     props: {
-      projectData
+      blogPostData
     }
   };
   ```
 
-  - And finally, we can access this projectData prop in your component and display the project title dynamically like so:
+  - And finally, we can access this `blogPostData` prop in your component and display the blog post `title` dynamically like so:
 
   ```ts
-  type ProjectPageProps = {
-    projectData: {
-      title: string;
-    };
+  // props type
+  type BlogPostPageProps = {
+    blogPostData: ContentfulBlogPost;
   };
 
-  const ProjectPage: NextPage<ProjectPageProps> = ({ projectData }) => (
+  const BlogPostPage: NextPage<BlogPostPageProps> = ({ blogPostData }) => (
     <div>
+      {/* dyanmic head for seo */}
       <Head>
-        <title>{projectData.title} | Andrew Shearer Dev Portfolio</title>
-        <meta name='description' content={projectData.title} />
+        <title>{blogPostData.title} | Andrew Shearer Dev Portfolio</title>
+        <meta name='description' content={blogPostData.title} />
       </Head>
 
-      <h2>Project Page</h2>
+      <h1>Blog Post Page</h1>
 
       <p>
-        This is the project page for <strong>{projectData.title}</strong>
+        This is the blog post page for <strong>{blogPostData.title}</strong>
       </p>
     </div>
   );
 
-  export default ProjectPage;
+  export default BlogPostPage;
   ```
 
   - You can see we also use the `<Head />` component from Next to dynamically set the title and meta description of the page for SEO purposes
 
-- Now let's update the types for the 2 getStatic functions
+## Typing the `getStatic` Functions
 
-  - Thankfully, Next gives us the types `GetStaticPaths` & `GetStaticProps`
-  - We can add these to our import like so:
+Now let's update the types for the 2 `getStatic` functions
 
-  ```ts
-  import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
-  ```
+- Thankfully, Next gives us the types `GetStaticPaths` & `GetStaticProps`
+- We can add these to our import like so:
 
-  - We can set the type of getStaticPaths() to GetStaticPaths, and do the same for getStaticProps with its respective type:
+```ts
+import type { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+```
 
-  ```ts
-  export const getStaticPaths: GetStaticPaths = async () => {
-    // ...
-  };
+- We can set the type of getStaticPaths() to GetStaticPaths, and do the same for getStaticProps with its respective type:
 
-  export const getStaticProps: GetStaticProps = async ({ params }) => {
-    // ...
-  };
-  ```
+```ts
+export const getStaticPaths: GetStaticPaths = async () => {
+  // ...
+};
 
-  - However, after doing this, you'll see a type error here in `getStaticProps()`:
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  // ...
+};
+```
 
-  ```ts
-  export const getStaticProps: GetStaticProps = async ({ params }) => {
-    // Property 'slug' does not exist on type 'ParsedUrlQuery | undefined'
-    const { slug } = params;
-  };
-  ```
+- However, after doing this, you'll see a type error here in `getStaticProps()`:
 
-  - Note the first line of the `getStaticProps`. Here we are attempting to access the `slug` variable that was created in `getStaticPaths` and returned inside the `params` object. This is the line that causes the error as `params` has the type `ParsedUrlQuery | undefined` and `slug` does not exist in `ParsedUrlQuery`:
-    - `const { slug } = params`
-  - To fix this, simply create an interface that extends `ParsedUrlQuery` and contains a `slug` property:
+```ts
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  // Property 'slug' does not exist on type 'ParsedUrlQuery | undefined'
+  const { slug } = params;
+};
+```
 
-  ```ts
-  interface IParams extends ParsedUrlQuery {
-    slug: string;
-  }
-  ```
+- Note the first line of the `getStaticProps`. Here we are attempting to access the `slug` variable that was created in `getStaticPaths` and returned inside the `params` object. This is the line that causes the error as `params` has the type `ParsedUrlQuery | undefined` and `slug` does not exist in `ParsedUrlQuery`:
+  - `const { slug } = params`
+- To fix this, simply create an interface that extends `ParsedUrlQuery` and contains a `slug` property:
 
-  - Side note, if you wish to extend an interface to a type, you can do so like this:
+```ts
+interface IParams extends ParsedUrlQuery {
+  slug: string;
+}
+```
 
-  ```ts
-  type IParams = ParsedUrlQuery & {
-    slug: string;
-  };
-  ```
+- Side note, if you wish to extend an interface to a type, you can do so like this:
 
-  - Examples can be seen [here](https://stackoverflow.com/questions/37233735/interfaces-vs-types-in-typescript#answer-52682220)
+```ts
+type IParams = ParsedUrlQuery & {
+  slug: string;
+};
+```
 
-  - Then import ParsedUrlQuery from `querystring`:
+- Examples can be seen [here](https://stackoverflow.com/questions/37233735/interfaces-vs-types-in-typescript#answer-52682220)
 
-  ```ts
-  import type { ParsedUrlQuery } from 'querystring';
-  ```
+- Then import ParsedUrlQuery from `querystring`:
 
-  - This solution was found [here](https://wallis.dev/blog/nextjs-getstaticprops-and-getstaticpaths-with-typescript)
+```ts
+import type { ParsedUrlQuery } from 'querystring';
+```
+
+- This solution was found [here](https://wallis.dev/blog/nextjs-getstaticprops-and-getstaticpaths-with-typescript)
