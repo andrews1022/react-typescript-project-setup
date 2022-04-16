@@ -95,7 +95,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
 - Use this:
 
-```
+```json
 "scripts": {
   "build": "npm run clean && gatsby build",
   "clean": "gatsby clean",
@@ -113,7 +113,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
     - Run the command: `npm un gh-pages prettier`
 - Update NPM packages to these versions (do _**NOT**_ prefix version numbers with `^`):
 
-```
+```json
 "@builder.io/gatsby": "3.0.0",
 "@builder.io/react": "1.1.49",
 "@builder.io/widgets": "1.2.21",
@@ -200,7 +200,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
   - As of [Gatsby v4.8](https://www.gatsbyjs.com/docs/reference/release-notes/v4.8/#support-for-typescript-in-gatsby-browser-and-gatsby-ssr), we can have `gatsby-browser` and `gatsby-ssr` at the root level use `.tsx` without any extra configuration!
   - `gatsby-browser.tsx` use this code:
 
-  ```
+  ```tsx
   import React from 'react';
   import type { GatsbyBrowser } from 'gatsby';
 
@@ -219,7 +219,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
   - `gatsby-ssr.tsx` use this code:
 
-  ```
+  ```tsx
   import React from 'react';
   import type { GatsbySSR } from 'gatsby';
 
@@ -239,7 +239,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
   - Copy everything in `gatsby-config.js` into `config.ts` in the `gatsby` folder
   - Replace everything in `gatsby-config.js` with just these 2 lines:
 
-  ```
+  ```ts
   require('ts-node').register();
 
   module.exports = require('./gatsby/config');
@@ -249,7 +249,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
   - `builder-settings.ts` use this code:
 
-  ```
+  ```ts
   import { builder } from '@builder.io/react';
 
   // a set of widgets you can use in the editor, optional.
@@ -264,7 +264,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
   - `config.ts` in `src` folder use this code:
 
-  ```
+  ```ts
   export default {
     builderAPIKey: 'YOUR_KEY_HERE'
   };
@@ -273,7 +273,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
   - `theme.ts`: No changes necessary
   - `config.ts` in `gatsby` folder use this code:
 
-  ```
+  ```ts
   import dotenv from 'dotenv';
   import path from 'path';
 
@@ -318,114 +318,117 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
     - Delete `.builder.js`
     - Use this in Hero.tsx (no need for separate file):
 
-    ```
+    ```tsx
     import React from 'react';
-      import { Builder, Image } from '@builder.io/react';
-      import { Parallax, Background } from 'react-parallax';
-      import Button from '@material-ui/core/Button';
-      import Typography from '@material-ui/core/Typography';
-      import Box from '@material-ui/core/Box';
+    import { Builder, Image } from '@builder.io/react';
+    import { Parallax, Background } from 'react-parallax';
+    import Button from '@material-ui/core/Button';
+    import Typography from '@material-ui/core/Typography';
+    import Box from '@material-ui/core/Box';
 
-      type HeroProps = {
-        buttonLink: string;
-        buttonText: string;
-        darkMode: boolean;
-        height: number;
-        image: string;
-        parallaxStrength: number;
-        title: string;
-      };
+    type HeroProps = {
+      buttonLink: string;
+      buttonText: string;
+      darkMode: boolean;
+      height: number;
+      image: string;
+      parallaxStrength: number;
+      title: string;
+    };
 
-      export const Hero = ({
-        buttonLink,
-        buttonText,
-        darkMode,
-        height,
-        image,
-        parallaxStrength,
-        title
-      }: HeroProps) => {
-        return (
-          <Parallax
-            style={{ height }}
-            blur={{ min: -20, max: 20 }}
-            bgImageAlt={title}
-            strength={parallaxStrength}
+    export const Hero = ({
+      buttonLink,
+      buttonText,
+      darkMode,
+      height,
+      image,
+      parallaxStrength,
+      title
+    }: HeroProps) => {
+      return (
+        <Parallax
+          style={{ height }}
+          blur={{ min: -20, max: 20 }}
+          bgImageAlt={title}
+          strength={parallaxStrength}
+        >
+          <Box
+            style={{ color: darkMode ? 'gray' : 'white' }}
+            textAlign='center'
+            paddingTop={`calc(${height}px/3)`}
           >
-            <Box
+            <Typography variant='h2'>{title}</Typography>
+            <Button
               style={{ color: darkMode ? 'gray' : 'white' }}
-              textAlign='center'
-              paddingTop={`calc(${height}px/3)`}
+              variant='outlined'
+              href={buttonLink}
             >
-              <Typography variant='h2'>{title}</Typography>
-              <Button style={{ color: darkMode ? 'gray' : 'white' }} variant='outlined' href={buttonLink}>
-                {buttonText}
-              </Button>
-            </Box>
-            <Background>
-              {/* Builder optimized image with srcset, lazy, etc */}
-              <Image image={image} />
-            </Background>
-          </Parallax>
-        );
-      };
+              {buttonText}
+            </Button>
+          </Box>
+          <Background>
+            {/* Builder optimized image with srcset, lazy, etc */}
+            <Image image={image} />
+          </Background>
+        </Parallax>
+      );
+    };
 
-      Builder.registerComponent(Hero, {
-        name: 'Hero',
-        // Optionally give a custom icon (image url - ideally a black on transparent bg svg or png)
-        image:
-          'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fd6d3bc814ffd47b182ec8345cc5438c0',
-        inputs: [
-          {
-            name: 'title',
-            type: 'string',
-            defaultValue: 'Your Title Here'
-          },
-          {
-            name: 'image',
-            type: 'file',
-            allowedFileTypes: ['jpeg', 'jpg', 'png', 'svg'],
-            required: true,
-            defaultValue:
-              'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236'
-          },
-          {
-            name: 'buttonLink',
-            type: 'string',
-            defaultValue: 'https://example.com'
-          },
-          {
-            name: 'buttonText',
-            type: 'string',
-            defaultValue: 'Click'
-          },
-          {
-            name: 'height',
-            type: 'number',
-            defaultValue: 400
-          },
-          {
-            name: 'darkMode',
-            type: 'boolean',
-            defaultValue: false
-          },
-          // `advanced: true` hides this option under the "show advanced" toggle
-          {
-            name: 'parallaxStrength',
-            type: 'number',
-            advanced: true,
-            defaultValue: 400
-          }
-        ]
-      });
-
+    Builder.registerComponent(Hero, {
+      name: 'Hero',
+      // Optionally give a custom icon (image url - ideally a black on transparent bg svg or png)
+      image:
+        'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2Fd6d3bc814ffd47b182ec8345cc5438c0',
+      inputs: [
+        {
+          name: 'title',
+          type: 'string',
+          defaultValue: 'Your Title Here'
+        },
+        {
+          name: 'image',
+          type: 'file',
+          allowedFileTypes: ['jpeg', 'jpg', 'png', 'svg'],
+          required: true,
+          defaultValue:
+            'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236'
+        },
+        {
+          name: 'buttonLink',
+          type: 'string',
+          defaultValue: 'https://example.com'
+        },
+        {
+          name: 'buttonText',
+          type: 'string',
+          defaultValue: 'Click'
+        },
+        {
+          name: 'height',
+          type: 'number',
+          defaultValue: 400
+        },
+        {
+          name: 'darkMode',
+          type: 'boolean',
+          defaultValue: false
+        },
+        // `advanced: true` hides this option under the "show advanced" toggle
+        {
+          name: 'parallaxStrength',
+          type: 'number',
+          advanced: true,
+          defaultValue: 400
+        }
+      ]
+    });
     ```
 
     - Just make sure to update import in `builder-settings.ts`
 
   - `RenderLink.tsx` use this code:
 
-  ```
+  ```tsx
   import React from 'react';
 
   const RenderLink = (props: any) => {
@@ -447,7 +450,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
   - `PageLayout.tsx` use this code:
 
-  ```
+  ```tsx
   import React from 'react';
   import type { ReactNode } from 'react';
   import { graphql, StaticQuery } from 'gatsby';
@@ -518,7 +521,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
 
   - `RootLayout.tsx` use this code:
 
-  ```
+  ```tsx
   import React from 'react';
   import type { ReactNode } from 'react';
   import { Helmet } from 'react-helmet';
@@ -631,7 +634,7 @@ Need to setup through the website UI, as `netlify-cli` package causes Builder.io
   - Replace the placeholder in .env.development & .env.production with the key
 - Update plugin object in `gatsby/config.ts`:
 
-```
+```ts
 {
   resolve: '@builder.io/gatsby',
   options: {
@@ -684,7 +687,7 @@ We will not only add Styled Components, but also remove Material UI (optional)
   - `theme.ts`
 - In `theme.ts`, add this code:
 
-```
+```ts
 const theme = {
   mediaQueries: {
     desktopHD: 'only screen and (max-width: 1920px)',
@@ -742,7 +745,7 @@ export default theme;
 
 - In `GlobalStyle.ts` added this code:
 
-```
+```ts
 import { createGlobalStyle } from 'styled-components';
 import theme from './theme';
 
@@ -842,7 +845,7 @@ export default GlobalStyle;
 
 - Update `RootLayout.tsx` to this:
 
-```
+```tsx
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import type { ReactNode } from 'react';
@@ -884,7 +887,7 @@ export default RootLayout;
 
 - Update PageLayout.tsx to:
 
-```
+```tsx
 import React from 'react';
 import type { ReactNode } from 'react';
 import { graphql, StaticQuery } from 'gatsby';
@@ -951,7 +954,7 @@ export default PageLayout;
 - In that file, create `index.tsx`
 - Copy and paste in the following code:
 
-```
+```tsx
 import React from 'react';
 import { Builder } from '@builder.io/react';
 
@@ -976,7 +979,7 @@ Builder.registerComponent(Heading, {
 
 - Go to `src/builder-settings.ts` and add this just above builder.init():
 
-```
+```ts
 // Import all custom components so you can use in the builder.io editor here
 import './components/Heading';
 ```

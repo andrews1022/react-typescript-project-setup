@@ -68,7 +68,7 @@ List of files/folders and their purpose:
 
 - Group all `dependencies` together alphabetically then remove `devDependencies`:
 
-```
+```json
 "@headlessui/react": "^1.5.0",
 "@shopify/hydrogen": "^0.12.0",
 "@shopify/prettier-config": "^1.1.2",
@@ -95,7 +95,7 @@ List of files/folders and their purpose:
 
 - Order scripts alphabetically:
 
-```
+```json
 "build:client": "vite build --outDir dist/client --manifest",
 "build:server": "vite build --outDir dist/server --ssr @shopify/hydrogen/platforms/node",
 "build:worker": "cross-env WORKER=true vite build --outDir dist/worker --ssr @shopify/hydrogen/platforms/worker-event",
@@ -148,7 +148,7 @@ This boilerplate project does NOT come with a TypeScript variant. We must manual
 - Add `tsconfig.json` file: `tsc --init`
 - Copy and paste this code in:
 
-```
+```json
 {
   "compilerOptions": {
     "esModuleInterop": true,

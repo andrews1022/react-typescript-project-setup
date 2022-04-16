@@ -89,6 +89,13 @@ export default App;
   - Pick `JSON` for the file format
   - Download any additional packages if prompted
   - Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
+- You can add on these 2 rules if you are using React v17 or later:
+
+```json
+"react/jsx-uses-react": "off",
+"react/react-in-jsx-scope": "off",
+```
+
 - Commit this progress: `git add . && git commit -m 'added eslint' && git push -u origin main`
 
 ## Styled Components Setup
@@ -206,6 +213,7 @@ const GlobalStyle = createGlobalStyle`
 
   button,
   input,
+  select,
   textarea {
     /* add custom font-family here */
   }

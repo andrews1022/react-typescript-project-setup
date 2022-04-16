@@ -759,6 +759,13 @@ Now let's update the components to `.tsx`
   - What format do you want your config file to be in? · `JSON`
 - Download any additional packages if prompted
 - Copy and paste in rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
+- You can add on these 2 rules if you are using React v17 or later:
+
+```json
+"react/jsx-uses-react": "off",
+"react/react-in-jsx-scope": "off",
+```
+
 - Commit this progress: `git add . && git commit -m 'added eslint' && git push -u origin main`
 
 ## Styled Components Setup
