@@ -1010,3 +1010,91 @@ const StyledReactMarkdown = styled(ReactMarkdown)`
 // down in the jsx...
 <StyledReactMarkdown>{blogPostData.content}</StyledReactMarkdown>;
 ```
+
+## GraphQL Fragments
+
+We can use [fragments](https://graphql.org/learn/queries/#fragments) to group together highly reused fields and keep our query's lean and mean.
+
+- Create a `graphql` folder and then a file `fragments.ts` in that folder:
+  - `mkdir graphqlol && cd graphqlol && touch fragments.ts && cd ..`
+- In this file, add the following:
+
+```ts
+const gql = String.raw;
+
+export const FRAGMENT_CONTENTFUL_IMAGE = gql`
+  fragment ImageFields on Asset {
+    description
+    height
+    sys {
+      id
+    }
+    url
+    width
+  }
+`;
+```
+
+- Next, let's go to `pages/index.tsx`
+
+  - Since we are using template strings, we can interpolate the fragment. Fragments should be place outside the closing pair query `{ }` brackets:
+
+  ```ts
+  // .. rest of fetch call up here ^^
+
+  body: JSON.stringify({
+    query: gql`
+      query HomepageQuery {
+        blogPostCollection {
+          items {
+            image {
+              ...ImageFields
+            }
+            slug
+            sys {
+              id
+            }
+            title
+          }
+        }
+      }
+
+      ${FRAGMENT_CONTENTFUL_IMAGE}
+    `
+  });
+  ```
+
+  - Then simply replace all the fields the fragment uses with `...ImageFields`
+  - We can now update the query in `pages/blog/[slug].tsx` to use this fragment as well:
+
+  ```ts
+  body: JSON.stringify({
+    query: gql`
+      query SingleBlogPostQuery($slug: String!) {
+        blogPostCollection(where: { slug: $slug }, limit: 1) {
+          items {
+            author {
+              bio
+              image {
+                ...ImageFields
+              }
+              name
+            }
+            content
+            image {
+              ...ImageFields
+            }
+            title
+          }
+        }
+      }
+
+      ${FRAGMENT_CONTENTFUL_IMAGE}
+    `,
+    variables: {
+      slug
+    }
+  });
+  ```
+
+- Now the query code is a bit cleaner and easier to read!
