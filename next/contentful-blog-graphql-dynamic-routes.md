@@ -954,3 +954,59 @@ import type { ParsedUrlQuery } from 'querystring';
 ```
 
 - This solution was found [here](https://wallis.dev/blog/nextjs-getstaticprops-and-getstaticpaths-with-typescript)
+
+## Display the Markdown Content
+
+We can use the [`react-markdown`](https://www.npmjs.com/package/react-markdown) package to easily render the Markdown text from our Blog Posts.
+
+_**NOTE**_: Another solid choice would be [`@contentful/rich-text-react-renderer`](https://www.npmjs.com/package/@contentful/rich-text-react-renderer). However, at the time of writing (Apr 16, 2022), I was using React v18, and `@contentful/rich-text-react-renderer` is only working with React v16 & v17.
+
+We currently have this in the JSX in `pages/blog/[slug].tsx`:
+
+```ts
+<p className='markdown'>
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate, cumque.
+</p>
+```
+
+First, install `react-markdown`: `npm i react-markdown`
+
+If you change the `<p>` tag to this:
+
+```ts
+<p className='markdown'>{blogPostData.content}</p>
+```
+
+It will look like one giant big mess!
+
+First, import react-markdown:
+
+```ts
+import ReactMarkdown from 'react-markdown';
+```
+
+Then simply pass the `content` as children to the `ReactMarkdown` component:
+
+```ts
+<ReactMarkdown>{blogPostData.content}</ReactMarkdown>
+```
+
+Our list styling reset in GlobalStyle.ts is not rendering lists and links correctly. You could create a `StyledReactMarkdown` and use that instead. It would look something like this:
+
+```ts
+import styled from 'styled-components';
+
+const StyledReactMarkdown = styled(ReactMarkdown)`
+  ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  a {
+    color: blue;
+  }
+`;
+
+// down in the jsx...
+<StyledReactMarkdown>{blogPostData.content}</StyledReactMarkdown>;
+```
