@@ -1,4 +1,4 @@
-# Next
+# Next.js + Contentful
 
 This is my personal approach for generating a Blog using Next.js, Styled Components, TypeScript, & Contentful w/ GraphQL, and host on Vercel, with dyanmic routes and content.
 
@@ -1098,3 +1098,13 @@ export const FRAGMENT_CONTENTFUL_IMAGE = gql`
   ```
 
 - Now the query code is a bit cleaner and easier to read!
+
+## Host on Vercel
+
+- Go to [Vercel](https://vercel.com/) and create an account if you don't already have one
+- Then go to your [dashboard](https://vercel.com/dashboard)
+- Click `+ New Project`
+- Select the project from GitHub (authorize if needed)
+- Enter the environment variables one at a time
+- Click `Deploy`
+  - _**NOTE**_: If you have any errors of any kind (warnings ok), the site will not build
