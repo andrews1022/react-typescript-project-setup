@@ -31,6 +31,7 @@ To Do:
   - Upate `Layout` to take props
   - Create reusable GraphQL Query Function that is typed
   - Create reusable `Wrapper` styled component
+  - Create `BlogPosts.tsx` with `mode` prop for either `simple` or `complex`, then render component accordingly
 
 ## Boilerplate
 
@@ -1254,7 +1255,7 @@ Our app looks pretty awful right now. Let's add some basic styles to spruce it u
     export const CardBody = styled.div`
       background-color: ${({ theme }) => theme.colors.whiteSmoke};
       margin-top: -4px;
-      padding: 1.5rem;
+      padding: 2rem;
 
       a {
         font-weight: ${({ theme }) => theme.fontWeights.bold};
@@ -2167,9 +2168,9 @@ query SingleBlogPostQuery($slug: String!) {
 }
 ```
 
-Where we filter posts by the nested `categoriesCollection`. However, this is not possible because categoriesCollection is an object, and the `where` filter can only be used on arrays. So, what do we do here?
+Where we filter posts by the nested `categoriesCollection`. However, this is not possible because `categoriesCollection` is an object, and the `where` filter can only be used on arrays. So, what do we do here?
 
-Instead, we want to query for all `categories` of the matching slug, then find any BlogPosts that are linked to that matching category.
+Instead, we will query for all `categories` of the matching slug, then find any `BlogPosts` that are linked to that matching category.
 
 The query looks like this:
 
@@ -2202,7 +2203,7 @@ body: JSON.stringify({
 });
 ```
 
-The type for this also looks pretty crazy:
+The type for the destructured `data` variable also looks pretty crazy:
 
 ```ts
 type PropsGraphQLResponse = {
@@ -2229,8 +2230,42 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params as IParams;
 
   // get contentful data
-  const response = await fetch();
-  // ... query here
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        query: gql`
+          query PostByCategoryQuery($slug: String!) {
+            categoryCollection(where: { slug: $slug }) {
+              items {
+                linkedFrom {
+                  blogPostCollection {
+                    items {
+                      previewText
+                      slug
+                      sys {
+                        id
+                      }
+                      title
+                    }
+                  }
+                }
+                name
+              }
+            }
+          }
+        `,
+        variables: {
+          slug
+        }
+      })
+    }
+  );
 
   const { data }: PropsGraphQLResponse = await response.json();
 
@@ -2244,7 +2279,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 ```
 
-Now we can setup the type for the `blogPostData` prop:
+Now we can set the type for the category page `blogPostData` prop:
 
 ```ts
 type CategoryPageProps = {
@@ -2306,9 +2341,9 @@ const CategoryPage: NextPage<CategoryPageProps> = ({ blogPostData }) => {
 };
 ```
 
-You may have noticed that our query for the BlogPosts is a lot smaller than on the home page. This is due to [GraphQL Query Complexity Limits](https://www.contentful.com/developers/docs/references/graphql/#/introduction/query-complexity-limits). We can only query for those fields. So, we need to create a simpler version of how the BlogPost cards are displayed.
+You may have noticed that our query for the BlogPosts is a lot smaller than on the home page. This is due to [GraphQL Query Complexity Limits](https://www.contentful.com/developers/docs/references/graphql/#/introduction/query-complexity-limits). We can only query for those fields. So, we need to create a simpler version of how the `BlogPost` cards are displayed.
 
-This means first, we'll want to abstract the MainHeading styled component into a reusable global UI component:
+That means we'll first want to abstract the `MainHeading` styled component into a reusable global `UI` component:
 
 ```ts
 // components/UI/MainHeading.ts
@@ -2320,6 +2355,202 @@ export const MainHeading = styled.h1`
   margin: 3.5% 0 0 5%;
 `;
 ```
+
+The Homepage Component should now look like this:
+
+```ts
+const Home: NextPage<HomeProps> = ({ data }) => (
+  <main>
+    <MainHeading>Blog Posts</MainHeading>
+
+    <BlogPosts posts={data.blogPostCollection.items} />
+  </main>
+);
+```
+
+And the dynamic category page should look like this:
+
+```ts
+const CategoryPage: NextPage<CategoryPageProps> = ({ blogPostData }) => {
+  // destructure the one item out of blogPostData array
+  const [data] = blogPostData;
+
+  return (
+    <>
+      {/* dyanmic head for seo */}
+      <Head>
+        <title>{data.name} | Next.js Contentful Blog</title>
+        <meta name='description' content={data.name} />
+      </Head>
+
+      <MainHeading>
+        <span style={{ fontWeight: 'normal' }}>Category Page for</span> {data.name}
+      </MainHeading>
+
+      <div className='grid'>
+        {data.linkedFrom.blogPostCollection.items.map((post) => (
+          <h3 key={post.title}>{post.title}</h3>
+        ))}
+      </div>
+    </>
+  );
+};
+```
+
+Next, we'll want to add 2 new folders to BlogPosts:
+
+- `Complex`
+- `Simple`
+  - The `Complex` version will be what is currently on the home page
+  - The `Simple` version will be what is on the category page
+
+There will be some copy / pasting and duplication code for now. We can always refactor later.
+
+Move the current `BlogPosts.tsx` and `BlogPosts.styles.ts` into the `Complex` folder. Renamed both to `Complex.`.
+
+Then copy and paste both `Complex.` files into the `Simple` folder and rename both files to `Simple.`
+
+The Simple version will be slimmed down to this:
+
+```ts
+const Simple = ({ posts }: SimpleProps) => (
+  <S.Wrapper>
+    <S.Grid>
+      {posts.map((post) => (
+        <S.Card key={post.sys.id}>
+          <S.CardBody>
+            <S.PostTitle>{post.title}</S.PostTitle>
+
+            <S.PreviewText>{post.previewText}</S.PreviewText>
+
+            <Link href={`/blog/${post.slug}`}>Read Post &rarr;</Link>
+          </S.CardBody>
+        </S.Card>
+      ))}
+    </S.Grid>
+  </S.Wrapper>
+);
+```
+
+Let's also take this time to update the styles for the Complex card a bit as the height of the cards are not aligning:
+
+- Styles:
+
+```ts
+export const CardBody = styled.div`
+  background-color: ${({ theme }) => theme.colors.whiteSmoke};
+  margin-top: -4px;
+  padding: 2rem;
+
+  a {
+    font-weight: ${({ theme }) => theme.fontWeights.bold};
+
+    // removed hover
+  }
+`;
+
+export const CategoriesList = styled.ul`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+`;
+
+// grabbed random light colors from https://colorhunt.co/
+// place in utils file afterwards
+const setCategoryItemBackgroundColor = (category: string) => {
+  switch (category) {
+    case 'Category A':
+      return '#fafdd6';
+
+    case 'Category B':
+      return '#D57E7E';
+
+    case 'Category C':
+      return '#8fbdd3';
+
+    case 'Category D':
+      return '#E4D1B9';
+
+    case 'Category E':
+      return '#ECA6A6';
+
+    case 'Category F':
+      return '#D18CE0';
+
+    case 'Category G':
+      return '#F0D9FF';
+
+    case 'Category H':
+      return '#D1E8E4';
+
+    default:
+      return `#92ba92`;
+  }
+};
+
+type CategoryItemProps = {
+  category: string;
+};
+
+export const CategoryItem = styled.li<CategoryItemProps>`
+  background-color: ${(props) => setCategoryItemBackgroundColor(props.category)};
+  padding: 0.5rem;
+`;
+```
+
+- Component:
+
+```ts
+const Complex = ({ posts }: ComplexProps) => (
+  <S.Wrapper>
+    <S.Grid>
+      {posts.map((post) => (
+        <S.Card key={post.sys.id}>
+          <NextImage imageData={post.image} />
+
+          <S.CardBody>
+            <S.PostTitle>
+              {post.title}
+
+              <span>&bull;</span>
+
+              <S.TimeToRead>{timeToRead(post.content)} min read</S.TimeToRead>
+            </S.PostTitle>
+
+            <S.PreviewText>{post.previewText}</S.PreviewText>
+
+            <S.CategoriesList>
+              {post.categoriesCollection.items.map((category) => (
+                <S.CategoryItem key={category.sys.id} category={category.name}>
+                  <Link href={`/category/${category.slug}`}>{category.name}</Link>
+                </S.CategoryItem>
+              ))}
+            </S.CategoriesList>
+
+            <Link href={`/blog/${post.slug}`}>Read Post &rarr;</Link>
+          </S.CardBody>
+        </S.Card>
+      ))}
+    </S.Grid>
+  </S.Wrapper>
+);
+```
+
+Let's also quickly set some styles for the overall `__next` wrapped so that the footer always stays at the bottom
+
+- In `GlobalStyles.ts` add this:
+
+```css
+#__next {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+```
+
+- Then add `margin-top: auto;` to styled `Footer` in `Footer.styles.ts`
 
 ## Creating & Displaying Related Posts
 
