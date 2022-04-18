@@ -1,6 +1,36 @@
-# Next.js + Contentful
+# Next.js + Contentful Blog
 
-This is my personal approach for generating a Blog using Next.js, Styled Components, TypeScript, & Contentful w/ GraphQL, and host on Vercel, with dyanmic routes and content.
+This doc will show you how to generate a Blog using Next.js, Styled Components, TypeScript, & Contentful w/ GraphQL, and host on Vercel, with dyanmic routes and content using Static Site Generation.
+
+The following will be covered:
+
+- Setting up Next.js Boilerplate
+- Contentful
+- Custom ESLint (Optional)
+- Basic Components
+- Styled Components
+- Basic Custom Types
+- Querying for Contentful Data Using GraphQL & Fetch API
+- BlogPosts Component
+- Dynamic Routes & Pages
+- Typing the `getStatic` Functions
+- Display the Markdown Content
+- GraphQL Fragments
+- Update Styling
+- Displaying the Author
+- Creating Custom `NextImage` Component
+- Adding Date Published and Time To Read
+- Adding Preview Text
+- Adding Categories
+- Creating & Displaying `RelatedPosts`
+- Host on Vercel
+
+To Do:
+
+- Refactoring:
+  - Upate `Layout` to take props
+  - Create reusable GraphQL Query Function that is typed
+  - Create reusable `Wrapper` styled component
 
 ## Boilerplate
 
@@ -11,7 +41,7 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
 - Quickly go through each file and format on save with Prettier.
 - Commit this progress: `git add . && git commit -m 'project setup' && git push -u origin main`
 
-## Contentful Setup
+## Contentful
 
 - Login to Contentful [here](https://be.contentful.com/login)
 - Create an `Author` Content Model with the following fields:
@@ -25,8 +55,9 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
   - Content (Markdown text box)
   - Author (reference to Author Model)
 - Create some dummy Blog posts, or real ones, whichever you prefer
+  - You can grab some dummy Markdown content from [here](https://markdown-it.github.io/)
 
-## Custom ESLint
+## Custom ESLint (Optional)
 
 - Remove current `.eslintrc.json` and uninstall existing ESLint packages: `rm .eslintrc.json && npm un eslint eslint-config-next`
 - Initialize ESLint: `npx eslint --init` or `npm init @eslint/config`
@@ -48,12 +79,12 @@ This is my personal approach for generating a Blog using Next.js, Styled Compone
 
 Here we'll setup a few very basic Layout based components:
 
-- Footer
-- Nav
-- Layout
+- `Footer`
+- `Nav`
+- `Layout`
   - Run the command: `cd components && touch Footer.tsx Nav.tsx Layout.tsx && cd ..`
 
-Footer.tsx:
+`Footer.tsx`:
 
 ```tsx
 const Footer = () => (
@@ -68,7 +99,7 @@ const Footer = () => (
 export default Footer;
 ```
 
-Nav.tsx:
+`Nav.tsx`:
 
 ```tsx
 import Link from 'next/link';
@@ -86,7 +117,7 @@ const Nav = () => (
 export default Nav;
 ```
 
-Layout.tsx:
+`Layout.tsx`:
 
 ```ts
 import Head from 'next/head';
@@ -117,7 +148,7 @@ const Layout = ({ children }: LayoutProps) => (
 export default Layout;
 ```
 
-Also in the Layout component, we've moved the `<Head>` from pages/index.tsx to here. This way the Head will be the same on all pages.
+Also in the `Layout` component, we've moved the `<Head>` from `pages/index.tsx` to here. This way the `Head` will be the same on all pages.
 
 You can also update it to take a `title` prop of type string and pass in a dynamic value for dynamic pages or hard coded value on pages like an About Us or Contact Us page.
 
@@ -328,7 +359,7 @@ You can also update it to take a `title` prop of type string and pass in a dynam
   import { ServerStyleSheet } from 'styled-components';
 
   class MyDocument extends Document {
-    static getInitialProps = async (ctx: DocumentContext): Promise<DocumentInitialProps> => {
+    static getInitialProps = async (ctx: DocumentContext): Promise<any> => {
       const sheet = new ServerStyleSheet();
       const originalRenderPage = ctx.renderPage;
 
@@ -340,6 +371,7 @@ You can also update it to take a `title` prop of type string and pass in a dynam
 
         const initialProps = await Document.getInitialProps(ctx);
 
+        // can't use DocumentInitialProps as Promise type argument otherwise styles throws an error
         return {
           ...initialProps,
           styles: (
@@ -357,7 +389,14 @@ You can also update it to take a `title` prop of type string and pass in a dynam
     render() {
       return (
         <Html>
-          <Head>{/* add google fonts here */}</Head>
+          <Head>
+            <link rel='preconnect' href='https://fonts.googleapis.com' />
+            <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='true' />
+            <link
+              href='https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap'
+              rel='stylesheet'
+            />
+          </Head>
           <body>
             <Main />
             <NextScript />
@@ -414,11 +453,12 @@ export type ContentfulBlogPost = {
 };
 ```
 
-## Querying for Contentful Data Using GraphQL - `graphql-request`
+## Querying for Contentful Data Using GraphQL & Fetch API
 
 - Use Contentful GraphiQL playground here: `https://graphql.contentful.com/content/v1/spaces/YOUR_SPACE_ID_HERE/explore?access_token=YOUR_ACCESS_TOKEN_HERE`
   - Just make sure to update the placeholders with your actual Contentful Space ID and Access Token.
 - You can install the [`graphql-request`](https://www.npmjs.com/package/graphql-request) package: `npm i graphql-request`
+  - _**However**_, we will use plain [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) so to not introduce extra dependencies
 - Create `.env.local` & `.env.sample` at the root level: `touch .env.local .env.sample`
 
   - Add the following to each:
@@ -450,73 +490,18 @@ export type ContentfulBlogPost = {
 
   - Restart the dev server after making this change
 
-- In `pages/index.tsx`, add the following above the Component:
+- We can create a nice and simple utility `gql.ts` which will give us nice formatting and syntax highlighting the template strings. You _will_ need the [GraphQL extension for VS Code](https://marketplace.visualstudio.com/items?itemName=GraphQL.vscode-graphql) for it work, though.
+
+  - Create a utils folder and then create `gql.ts` inside that folder: `mkdir utils && cd utils && touch gql.ts && cd ..`
+  - In `gql.ts`, add just this one line of code:
 
   ```ts
-  export const getStaticProps = async () => {
-    // get contentful data
-    const endpoint = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
-
-    const options = {
-      headers: {
-        authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`
-      }
-    };
-
-    const graphQLClient = new GraphQLClient(endpoint, options);
-
-    const homePageQuery = gql`
-      query HomepageQuery {
-        // query here
-      }
-    `;
-
-    const data: ContentfulResponse = await graphQLClient.request(homePageQuery);
-
-    return {
-      props: {
-        data
-      }
-    };
-  };
+  export const gql = String.raw;
   ```
 
-  - This structure assumes that:
+  - Now we can import and use this in front of any GraphQL query template string, which we'll see just below
 
-    - You are querying for multiple things
-    - The type `ContentfulResponse` is just above this function and would look something like this:
-
-    ```ts
-    type ContentfulResponse = {
-      data: {
-        blogPostCollection: {
-          items: ContentfulBlogPost[];
-        };
-      };
-    };
-    ```
-
-- Now update the `prop` types for the `Home` page component:
-
-```ts
-type HomeProps = {
-  data: ContentfulResponse;
-};
-
-const Home: NextPage<HomeProps> = ({ data }) => {
-  // ...
-};
-```
-
-- Then pass the data down to components like so:
-
-```jsx
-<BlogPosts contentfulData={data.blogPostCollection.items} />
-```
-
-## Querying for Contentful Data Using GraphQL - No Dependencies
-
-We'll perform the same above but using just the Fetch API. This way we don't introduce any extra packages.
+- In `pages/index.tsx`, have the following:
 
 ```ts
 type ContentfulResponse = {
@@ -526,9 +511,6 @@ type ContentfulResponse = {
     };
   };
 };
-
-// neat trick for getting better formatting inside template string
-const gql = String.raw;
 
 export const getStaticProps = async () => {
   const response = await fetch(
@@ -542,7 +524,24 @@ export const getStaticProps = async () => {
       body: JSON.stringify({
         query: gql`
           query HomepageQuery {
-            # query here...
+            blogPostCollection {
+              items {
+                image {
+                  description
+                  height
+                  sys {
+                    id
+                  }
+                  url
+                  width
+                }
+                slug
+                sys {
+                  id
+                }
+                title
+              }
+            }
           }
         `
       })
@@ -571,7 +570,7 @@ const Home: NextPage<HomeProps> = ({ data, posts }) => {
 
 ## BlogPosts Component
 
-We don't have a BlogPosts component, so let's create it quickly:
+We don't have a BlogPosts component, so let's create it quickly. This component will simply render all the preview cards on the homepage:
 
 - Create the file: `cd components && touch BlogPosts.tsx && cd ..`
 - In this file, add the following:
@@ -597,12 +596,10 @@ const BlogPosts = ({ contentfulData: posts }: BlogPostsProps) => {
       {posts.map((post) => (
         <div key={post.sys.id}>
           <h3>{post.title}</h3>
-          <p>
-            View post{' '}
-            <button style={{ color: 'blue' }} type='button'>
-              <Link href={`/blog/${post.slug}`}>here</Link>
-            </button>
-          </p>
+
+          <button style={{ color: 'blue' }} type='button'>
+            <Link href={`/blog/${post.slug}`}>Read Post</Link>
+          </button>
         </div>
       ))}
     </div>
@@ -612,21 +609,21 @@ const BlogPosts = ({ contentfulData: posts }: BlogPostsProps) => {
 export default BlogPosts;
 ```
 
-Now we can click on the `here` button to take us to the individual blog post.
+Now we can click on the `Read Post` button to take us to the individual blog post. However, we will see a 404 page. Let's fix that next.
 
 ## Dynamic Routes & Pages
 
 Now we want to create the dynamic routes & page template for our Blog Posts.
 
-- In the pages folder, create a new `blog` folder
+- In the `pages` folder, create a new `blog` folder
 
   - Then in this `blog` folder, create a file: `[slug].tsx`
-  - Using the square brackets [ ] with a variable, in this case `slug`, tells Next.js to use Dyanmic Routing and a dynamic routed pages
+  - Using the square brackets `[ ]` with a variable, in this case `slug`, tells Next.js to use Dyanmic Routing and a dynamic routed pages
   - Run the command: `cd pages && mkdir blog && cd blog && touch [slug].tsx && cd .. && cd ..`
 
 - In this file we'll need both `getStaticProps()` and `getStaticPaths()`
 
-  - Start with this empty functions for now:
+  - Start with these empty functions for now:
 
   ```ts
   export const getStaticPaths = async () => {
@@ -644,7 +641,7 @@ Now we want to create the dynamic routes & page template for our Blog Posts.
 
 - Let's update `getStaticPaths()` first:
 
-  - First, let's make our request to Contentful. Here we will request all the blog posts and grab just the `slugs`:
+  - Let's make our request to Contentful. Here we will request all the blog posts and grab just the `slugs`:
 
   ```ts
   export const getStaticPaths = async () => {
@@ -1020,7 +1017,7 @@ We can use [fragments](https://graphql.org/learn/queries/#fragments) to group to
 - In this file, add the following:
 
 ```ts
-const gql = String.raw;
+import { gql } from '../utils/gql';
 
 export const FRAGMENT_CONTENTFUL_IMAGE = gql`
   fragment ImageFields on Asset {
@@ -1098,6 +1095,1239 @@ export const FRAGMENT_CONTENTFUL_IMAGE = gql`
   ```
 
 - Now the query code is a bit cleaner and easier to read!
+
+## Update Styling
+
+Our app looks pretty awful right now. Let's add some basic styles to spruce it up a bit.
+
+- To help keep our components organized, we'll create folders for each one: `cd components && mkdir BlogPosts Footer Layout Nav && cd ..`
+- Then move each component into it's own folder
+- Next, create a styles file in each component folder like so: `[ComponentName].styles.ts`
+  - This styles file will house any Styled Components that are used by ONLY the component in the same folder
+  - Any global Styled Components will get put in a `UI` folder in the components folder: `cd components && mkdir UI && cd ..`
+- Next, let's add a basic colour palette and font sizes we can use throughout. Let's update our `theme.ts`
+
+  ```ts
+  const theme = {
+    // ...
+    colors: {
+      // color palette from:
+      // https://colorhunt.co/palette/06113cff8c32ddddddeeeeee
+
+      sapphire: '#06113c', // dark blue
+      carrot: '#ff8c32', // orange
+      gainsboro: '#ddd', // light grey
+      whiteSmoke: '#eee', // off-white grey
+      nero: '#141414' // dark grey
+    },
+    fontSizes: {
+      copy: {
+        small: '0.875rem',
+        medium: '1rem',
+        large: '1.125rem'
+      },
+      heading: {
+        small: 'clamp(1.25rem, 5vw, 2rem)',
+        medium: 'clamp(1.75rem, 5vw, 3.25rem)',
+        large: 'clamp(2.5rem, 5vw, 4.5rem)'
+      }
+    }
+    // ...
+  };
+  ```
+
+- Now let's update our components
+
+  - `Footer`
+
+    - Styles:
+
+    ```ts
+    export const Footer = styled.footer`
+      background-color: ${({ theme }) => theme.colors.sapphire};
+      color: ${({ theme }) => theme.colors.whiteSmoke};
+      font-size: 1.25rem;
+      padding: 2rem;
+      text-align: center;
+
+      p {
+        font-size: inherit;
+      }
+    `;
+    ```
+
+    - Component:
+
+    ```ts
+    // styled components
+    import * as S from './Footer.styles';
+
+    const Footer = () => (
+      <S.Footer>
+        <p>
+          &copy; {new Date().getFullYear()} all rights reserved <span> | </span> designed and built
+          by andrew shearer
+        </p>
+      </S.Footer>
+    );
+    ```
+
+  - `Nav`
+
+    - Styles:
+
+    ```ts
+    export const Header = styled.header`
+      background-color: ${({ theme }) => theme.colors.gainsboro};
+      color: ${({ theme }) => theme.colors.nero};
+      font-size: ${({ theme }) => theme.fontSizes.heading.small};
+      font-weight: ${({ theme }) => theme.fontWeights.bold};
+      padding: 1.5% 5%;
+    `;
+    ```
+
+    - Component:
+
+    ```ts
+    // styled components
+    import * as S from './Nav.styles';
+
+    const Nav = () => (
+      <S.Header>
+        <nav className='nav'>
+          <ul>
+            <li>
+              <Link href='/'>Next.js Contentful Blog</Link>
+            </li>
+          </ul>
+        </nav>
+      </S.Header>
+    );
+    ```
+
+  - `BlogPosts`
+
+    - Styles:
+
+    ```ts
+    import styled from 'styled-components';
+
+    export const Wrapper = styled.div`
+      margin: 0 auto;
+      padding: 5% 0;
+      width: 90%;
+    `;
+
+    export const Grid = styled.div`
+      display: grid;
+      grid-gap: 3.5vw;
+      grid-template-columns: repeat(12, 1fr);
+
+      @media ${({ theme }) => theme.mediaQueries.tabletPortrait} {
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 7vw;
+      }
+    `;
+
+    export const Card = styled.div`
+      border-radius: 1.5rem;
+      grid-column: span 4;
+      overflow: hidden;
+      transition: ${({ theme }) => theme.transitions.short};
+
+      @media (hover) {
+        &:hover {
+          box-shadow: 0 0.75rem 1.5rem 0 rgba(0, 0, 0, 0.1);
+          transform: translateY(-0.25rem);
+        }
+      }
+
+      @media ${({ theme }) => theme.mediaQueries.tabletLandscape} {
+        grid-column: span 6;
+      }
+
+      @media ${({ theme }) => theme.mediaQueries.tabletPortrait} {
+        grid-column: 1 / -1;
+      }
+    `;
+
+    export const CardBody = styled.div`
+      background-color: ${({ theme }) => theme.colors.whiteSmoke};
+      margin-top: -4px;
+      padding: 1.5rem;
+
+      a {
+        font-weight: ${({ theme }) => theme.fontWeights.bold};
+
+        @media (hover) {
+          &:hover,
+          &:active,
+          &:focus {
+            color: ${({ theme }) => theme.colors.carrot};
+          }
+        }
+      }
+    `;
+
+    export const PostTitle = styled.h2`
+      font-size: ${({ theme }) => theme.fontSizes.copy.large};
+      font-weight: ${({ theme }) => theme.fontWeights.normal};
+      margin-bottom: 1rem;
+    `;
+    ```
+
+    - Component:
+
+    ```ts
+    const BlogPosts = ({ posts }: BlogPostsProps) => (
+      <S.Wrapper>
+        <S.Grid>
+          {posts.map((post) => (
+            <S.Card key={post.sys.id}>
+              <Image
+                src={post.image.url}
+                alt={post.image.description}
+                height={post.image.height}
+                width={post.image.width}
+                placeholder='blur'
+                blurDataURL={post.image.url}
+              />
+
+              <S.CardBody>
+                <S.PostTitle>{post.title}</S.PostTitle>
+
+                <Link href={`/blog/${post.slug}`}>Read Post &rarr;</Link>
+              </S.CardBody>
+            </S.Card>
+          ))}
+        </S.Grid>
+      </S.Wrapper>
+    );
+    ```
+
+- You might run into an error saying the `className` prop is not the same on Server (see the console).
+
+  - To fix this, create a .babelrc file at the root level: `touch .babelrc`
+  - In this file, add the following:
+
+  ```json
+  {
+    "presets": ["next/babel"],
+    "plugins": [["styled-components", { "ssr": true }]]
+  }
+  ```
+
+  - Restart the dev server, and the error will go away
+
+- Finally, the individual Blog Post page:
+
+  - Styles:
+
+  ```ts
+  import styled from 'styled-components';
+  import ReactMarkdown from 'react-markdown';
+
+  export const Wrapper = styled.div`
+    margin: 0 auto;
+    padding: 5% 0;
+    width: 90%;
+  `;
+
+  export const PostTitle = styled.h1`
+    font-size: ${({ theme }) => theme.fontSizes.heading.large};
+    font-weight: ${({ theme }) => theme.fontWeights.normal};
+  `;
+
+  export const ImageWrapper = styled.div`
+    height: 33vw;
+    margin: 2rem 0;
+    overflow: hidden;
+
+    & > span {
+      height: 100%;
+
+      img {
+        object-fit: cover;
+        object-position: center;
+      }
+    }
+  `;
+
+  export const StyledReactMarkdown = styled(ReactMarkdown)`
+    /* add spacing to all these elements */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    ol,
+    ul,
+    hr,
+    pre {
+      margin: 0.75rem 0;
+    }
+
+    /* headings */
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+    }
+
+    h4 {
+      font-size: 1.375rem;
+    }
+
+    h5 {
+      font-size: 1.25rem;
+    }
+
+    h6 {
+      font-size: 1.125rem;
+    }
+
+    /* lists */
+    ol,
+    ul {
+      padding-left: 1.25rem;
+    }
+
+    ul {
+      list-style: disc;
+    }
+
+    ol {
+      list-style: decimal;
+    }
+
+    /* links */
+    a {
+      color: ${({ theme }) => theme.colors.carrot};
+    }
+
+    /* code blocks */
+    pre {
+      background-color: #ddd;
+      line-height: 1.5;
+      padding: 0.75rem;
+    }
+  `;
+  ```
+
+  - Component:
+
+  ```ts
+  const BlogPostPage: NextPage<BlogPostPageProps> = ({ blogPostData }) => (
+    <>
+      {/* dyanmic head for seo */}
+      <Head>
+        <title>{blogPostData.title} | Andrew Shearer Dev Portfolio</title>
+        <meta name='description' content={blogPostData.title} />
+      </Head>
+
+      <S.Wrapper>
+        <S.PostTitle>{blogPostData.title}</S.PostTitle>
+
+        <S.ImageWrapper>
+          <Image
+            src={blogPostData.image.url}
+            alt={blogPostData.image.description}
+            height={blogPostData.image.height}
+            width={blogPostData.image.width}
+            placeholder='blur'
+            blurDataURL={blogPostData.image.url}
+          />
+        </S.ImageWrapper>
+
+        <S.StyledReactMarkdown>{blogPostData.content}</S.StyledReactMarkdown>
+      </S.Wrapper>
+    </>
+  );
+  ```
+
+## Displaying the Author
+
+Now let's update the blog post template to display the author as well.
+
+- Create a new `Author` folder in the components folder, and create `Author.tsx` & `Author.styles.ts` as well:
+
+`cd components && mkdir Author && cd Author && touch Author.tsx Author.styles.ts && cd .. && cd ..`
+
+- Styles:
+
+```ts
+import styled from 'styled-components';
+
+export const Wrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.nero};
+  margin-top: 2rem;
+  padding-top: 2rem;
+
+  @media ${({ theme }) => theme.mediaQueries.tabletPortrait} {
+    flex-direction: column;
+    text-align: center;
+  }
+`;
+
+export const ImageWrapper = styled.div`
+  height: 8rem;
+  width: 8rem;
+  border-radius: 50%;
+  overflow: hidden;
+
+  & > span {
+    height: 100% !important; /* need important to override default styles */
+
+    img {
+      object-fit: cover;
+      object-position: center;
+    }
+  }
+`;
+
+export const TextWrapper = styled.div`
+  h3 {
+    font-size: ${({ theme }) => theme.fontSizes.heading.small};
+  }
+`;
+```
+
+- Component:
+
+```ts
+// props type
+type AuthorProps = {
+  authorData: ContentfulAuthor;
+};
+
+const Author = ({ authorData }: AuthorProps) => (
+  <S.Wrapper>
+    <S.ImageWrapper>
+      <Image
+        src={authorData.image.url}
+        alt={authorData.image.description}
+        height={authorData.image.height}
+        width={authorData.image.width}
+        placeholder='blur'
+        blurDataURL={authorData.image.url}
+      />
+    </S.ImageWrapper>
+
+    <S.TextWrapper className='text-wrapper'>
+      <h3>{authorData.name}</h3>
+      <p>{authorData.bio}</p>
+    </S.TextWrapper>
+  </S.Wrapper>
+);
+```
+
+- Update `BlogPostPage` to display the `Author` component below the `StyledReactMarkdown`:
+
+```tsx
+const BlogPostPage: NextPage<BlogPostPageProps> = ({ blogPostData }) => (
+  <>
+    ...
+
+      <S.StyledReactMarkdown>{blogPostData.content}</S.StyledReactMarkdown>
+
+      {/* AUTHOR GOES HERE */}
+      <Author authorData={blogPostData.author} />
+    </S.Wrapper>
+  </>
+);
+```
+
+## Creating Custom `NextImage` Component
+
+Before we add Categories and RelatedPosts, it will be good idea to create our own custom `NextImage` component which uses the `Image` component.
+
+We're already using it in a few places with the same props, so we should create one component with it all pre-configured.
+
+- Create a new `NextImage` folder in the components folder, and create `NextImage.tsx`:
+
+`cd components && mkdir NextImage && cd NextImage && touch NextImage.tsx && cd .. && cd ..`
+
+- Component Code:
+
+```ts
+import Image from 'next/image';
+
+// custom types
+import { ContentfulImage } from '../../types/contentful';
+
+type NextImageProps = {
+  imageData: ContentfulImage;
+};
+
+const NextImage = ({ imageData }: NextImageProps) => (
+  <Image
+    src={imageData.url}
+    alt={imageData.description}
+    height={imageData.height}
+    width={imageData.width}
+    placeholder='blur'
+    blurDataURL={imageData.url}
+  />
+);
+
+export default NextImage;
+```
+
+Now replace instances of using `Image` with `NextImage` in `Author.tsx`, `BlogPosts.tsx`, & `blog/[slug].tsx`.
+
+You will pass down the entire `.image` object in each case.
+
+## Adding Date Published and Time To Read
+
+Let's update our BlogPost Model to have a Date Published, as well as display the estimated Time to Read.
+
+We'll place both of these pieces of information right below the Image on each individual post page.
+
+### Date Published
+
+- In Contentful, go to the Blog Post model
+  - Add a new `Date & time Field` and call it `Date Published`
+  - Set it to be Required, and click Confirm
+  - Then click Save
+- Go to each Blog Post piece of content and add a Date Published
+  - Make sure to give them each a different date so we can sort them when we query them
+- In `pages/index.tsx`, update the query to sort the Posts by Date Published in descending order
+
+  - Before:
+
+  ```ts
+  const gql = String.raw;
+
+  query HomepageQuery {
+    blogPostCollection {
+      # ...
+    }
+  }
+  ```
+
+  - After:
+
+  ```ts
+  const gql = String.raw;
+
+  query HomepageQuery {
+    blogPostCollection(order: [datePublished_DESC]) {
+      # ...
+    }
+  }
+  ```
+
+- Make sure to update the `ContentfulBlogPost` type as well:
+
+```ts
+export type ContentfulBlogPost = {
+  author: ContentfulAuthor;
+  content: string;
+  datePublished: string; // DATE ADDED!
+  image: ContentfulImage;
+  slug: string;
+  sys: {
+    id: string;
+  };
+  title: string;
+};
+```
+
+We'll need to create a formatDate function to correctly format the ISO 8601 Date String returned by Contentful.
+
+- Create a file formatDate.ts inside the utils folder: `cd utils && touch formatDate.ts && cd ..`
+- In this file, add the following:
+
+```ts
+const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+
+export const formatDate = (dateStr: string) => {
+  // starting date
+  const date = new Date(dateStr);
+
+  // construct desired pieces of data
+  const month = months[date.getMonth() + 1];
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  // return formatted date
+  return `${month} ${day}, ${year}`;
+};
+```
+
+- Back in the page component file, add the following below the image:
+
+```ts
+<div className='info-wrapper'>
+  <p className='date'>
+    <strong>Date Published: </strong>
+    <span>{formatDate(blogPostData.datePublished)}</span>
+  </p>
+  <p className='time-to-read'>
+    <strong>Estimated Time to Read: </strong>
+    <span>min</span>
+  </p>
+</div>
+```
+
+Next we'll add the estimated Time to Read
+
+### Time to Read
+
+- For this, we'll need a couple of things:
+  - Average words per minute read (~225)
+  - The total number of words in the post `content`
+- We can create another util function called `timeToRead`: `cd utils && touch timeToRead.ts && cd ..`
+
+  - In this file, add the following:
+
+  ```ts
+  export const timeToRead = (content: string) => {
+    const wordsPerMinute = 225;
+    const numberOfWordsInPost = content.trim().split(/\s+/).length;
+
+    return Math.ceil(numberOfWordsInPost / wordsPerMinute);
+  };
+  ```
+
+- Back in the page component file, update this section to use the function:
+
+```ts
+<div className='info-wrapper'>
+  // ...
+  <p className='time-to-read'>
+    <strong>Estimated Time to Read: </strong>
+    <span>{timeToRead(blogPostData.content)} min</span>
+  </p>
+</div>
+```
+
+- Now let's create a Styled Component to display these 2 pieces of information side-by-side and then stack them on mobile:
+
+```ts
+export const InfoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  @media ${({ theme }) => theme.mediaQueries.tabletPortrait} {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+`;
+```
+
+- Update the JSX to this (add a bullet and remove unnecessary class names:)
+
+```ts
+<S.InfoWrapper>
+  <p>
+    <strong>Date Published: </strong>
+    <span>{formatDate(blogPostData.datePublished)}</span>
+  </p>
+
+  <strong>&bull;</strong>
+
+  <p>
+    <strong>Estimated Time to Read: </strong>
+    <span>{timeToRead(blogPostData.content)} min</span>
+  </p>
+</S.InfoWrapper>
+```
+
+- Let's also add `timeToRead` to the cards in `BlogPosts.tsx` (yes this is redundant, you can choose where you want to place it)
+
+  - Update query in `pages/index.tsx` to query for `content`
+
+  - Create Styled Component in `BlogPosts.styles.ts`:
+
+  ```ts
+  export const TimeToRead = styled.span`
+    display: block;
+    font-size: ${({ theme }) => theme.fontSizes.copy.small};
+    margin-top: 2rem;
+  `;
+  ```
+
+  - Update the JSX:
+
+  ```ts
+  <S.CardBody>
+    <S.PostTitle>{post.title}</S.PostTitle>
+
+    <Link href={`/blog/${post.slug}`}>Read Post &rarr;</Link>
+
+    {/* ADD TIME TO READ HERE */}
+    <S.TimeToRead>{timeToRead(post.content)} min read</S.TimeToRead>
+  </S.CardBody>
+  ```
+
+## Adding Preview Text
+
+We'll also now add some preview text to each Blog post. This text will appear on each card.
+
+We'll also take this time to update each card's layout.
+
+- In Contentful, select the Blog Post model
+
+  - Add a Text field
+    - Select Long Text
+    - Give it a name
+    - Make it required
+    - Set style to multi line
+  - Go to each Blog Post and add in some preview text. You can use this dummy lorem ipsum text if you wish:
+
+    - "_This post is about lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsa, dicta._"
+
+- In the Code
+
+  - Update the `ContentfulBlogPost` type:
+
+  ```ts
+  export type ContentfulBlogPost = {
+    author: ContentfulAuthor;
+    content: string;
+    datePublished: string;
+    image: ContentfulImage;
+    previewText: string; // NEW
+    slug: string;
+    sys: {
+      id: string;
+    };
+    title: string;
+  };
+  ```
+
+  - Update the query in `pages/index.tsx`:
+
+  ```ts
+    query HomepageQuery {
+      blogPostCollection(order: [datePublished_DESC]) {
+        items {
+          content
+          image {
+            ...ImageFields
+          }
+          previewText
+          slug
+          sys {
+            id
+          }
+          title
+        }
+      }
+    }
+  ```
+
+  - Update the JSX in `BlogPosts.tsx`:
+
+  ```ts
+  <S.CardBody>
+    <S.PostTitle>
+      {post.title}
+      <span>&bull;</span>
+      <S.TimeToRead>{timeToRead(post.content)} min read</S.TimeToRead>
+    </S.PostTitle>
+
+    <S.PreviewText>{post.previewText}</S.PreviewText>
+
+    <Link href={`/blog/${post.slug}`}>Read Post &rarr;</Link>
+  </S.CardBody>
+  ```
+
+  - Updated Styled Components:
+
+  ```ts
+  export const PostTitle = styled.h2`
+    display: flex;
+    align-items: center;
+    font-size: ${({ theme }) => theme.fontSizes.copy.xlarge};
+    font-weight: ${({ theme }) => theme.fontWeights.normal};
+    gap: 0.75rem;
+  `;
+
+  export const PreviewText = styled.p`
+    font-size: ${({ theme }) => theme.fontSizes.copy.medium};
+    margin: 1.25rem 0;
+  `;
+
+  export const TimeToRead = styled.span`
+    font-size: ${({ theme }) => theme.fontSizes.copy.small};
+  `;
+  ```
+
+  - Added new font size in the theme:
+
+  ```ts
+  const theme = {
+    fontSizes: {
+      copy: {
+        small: '0.875rem',
+        medium: '1rem',
+        large: '1.125rem',
+        xlarge: '1.25rem' // NEW FONT SIZE
+      }
+    }
+  };
+  ```
+
+## Adding Categories
+
+Blog typically come with Categories. And with those Categories, we want to be able to:
+
+- Add Categories to each post
+- Click on a Category and be taken to page showing all posts using that category
+- Show Related Posts at the bottom of a post with all the same categories
+
+### Adding Categories to Each Post
+
+- In Contentful, create a new `Category` Content Model. It will have the following fields:
+  - `Name` (Entry Title, and is Unique)
+  - `Slug` (Short text, based off of Entry Title)
+- Create a few Categories, around 8-10 or so, and name them whatever you like.
+  - To keep things simple, I will use `CategoryA`, `CategoryB`, `CategoryC`, etc. up to `CategoryH`
+- Next, go to the Blog Post Model and add a reference field called `Categories`
+  - Select `Many references`
+  - Accept only 1-4 Categories (similar to [dev.to](https://dev.to/))
+  - Accept only `Category` entry type
+  - Make it required
+- Now go to each Blog Post and randomly add 1 - 4 Categories, just making sure you add all of them at least once
+  - You can go back to the Contentful GraphiQL playground and run a query to make sure:
+  ```ts
+  query CategoriesTestQuery {
+    blogPostCollection {
+      items {
+        categoriesCollection {
+          items {
+            sys {
+              id
+            }
+            name
+            slug
+          }
+        }
+        title
+      }
+    }
+  }
+  ```
+- Next we need to update our types in `types/contentful.ts`:
+
+```ts
+// reusable
+export type ContentfulId = {
+  id: string;
+};
+
+export type ContentfulImage = {
+  description: string;
+  height: number;
+  sys: ContentfulId;
+  url: string;
+  width: number;
+};
+
+// sections
+export type ContentfulAuthor = {
+  bio: string;
+  image: ContentfulImage;
+  name: string;
+};
+
+export type ContentfulCategory = {
+  sys: ContentfulId;
+  name: string;
+  slug: string;
+};
+
+export type ContentfulBlogPost = {
+  author: ContentfulAuthor;
+  categoriesCollection: {
+    items: ContentfulCategory[];
+  };
+  content: string;
+  datePublished: string;
+  image: ContentfulImage;
+  previewText: string;
+  slug: string;
+  sys: ContentfulId;
+  title: string;
+};
+```
+
+- Also created a reusable `ContentfulId` type since that structure appears a few times
+- Next, we'll simply add each posts' categories to their card to make sure it'll display correctly
+
+  - Update the query in `pages/index.tsx`:
+
+  ```ts
+  query HomepageQuery {
+    blogPostCollection(order: [datePublished_DESC]) {
+      items {
+        categoriesCollection {
+          items {
+            sys {
+              id
+            }
+            name
+            slug
+          }
+        }
+        content
+        image {
+          ...ImageFields
+        }
+        previewText
+        slug
+        sys {
+          id
+        }
+        title
+      }
+    }
+  }
+  ```
+
+  - Add this JSX to the `Card` below the `PreviewText`:
+
+  ```ts
+  <ul>
+    {post.categoriesCollection.items.map((category) => (
+      <li key={category.sys.id}>{category.name}</li>
+    ))}
+  </ul>
+  ```
+
+### Category Routing
+
+Now we want to create dynamic routes for the categories just like we did with the posts.
+
+When a user clicks on a Category, they'll go to a page that'll display all the posts that have that category.
+
+- In the `pages` folder, create a new folder `category`, and then in there a new file `[slug].tsx`:
+
+`cd pages && mkdir category && cd category && touch [slug].tsx && cd .. && cd ..`
+
+- In this `[slug].tsx` file, add the following boilerplate code (there'll be a lot of TypeScript / ESLint errors & warnings, but we'll address them shortly):
+
+```ts
+import type { GetStaticPaths, GetStaticProps } from 'next';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: slugs,
+    fallback: false // show 404 page
+  };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  return {
+    props: {}
+  };
+};
+
+type CategoryPageProps = {};
+
+const CategoryPage = (props: CategoryPageProps) => {
+  return (
+    <div>
+      <h1>Category Page</h1>
+    </div>
+  );
+};
+
+export default CategoryPage;
+```
+
+- We can copy & paste the internal code from `getStaticPaths` inside the `pages/blog/[slug].tsx` file and make some adjustments for categories:
+
+```ts
+type PathsGraphQLResponse = {
+  data: {
+    categoryCollection: {
+      items: ContentfulCategory[];
+    };
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  // get contentful data
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.CONTENTFUL_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        query: gql`
+          query CategorySlugsQuery {
+            categoryCollection {
+              items {
+                slug
+              }
+            }
+          }
+        `
+      })
+    }
+  );
+
+  const { data }: PathsGraphQLResponse = await response.json();
+
+  const slugs = data.categoryCollection.items.map((category) => ({
+    params: { slug: category.slug }
+  }));
+
+  return {
+    paths: slugs,
+    fallback: false // show 404 page
+  };
+};
+```
+
+- We can actually update the `BlogPosts` card to link to these pages now:
+
+```ts
+<ul className='categories-list'>
+  {post.categoriesCollection.items.map((category) => (
+    <li key={category.sys.id}>
+      <Link href={`/category/${category.slug}`}>{category.name}</Link>
+    </li>
+  ))}
+</ul>
+```
+
+- We will only see the plain `h1` _"Category Page"_, but it's a start!
+
+We will need the `IParams` type like we created for the blog post dynamic route, so let's add it to `types/global.ts` (create this file):
+
+```ts
+import type { ParsedUrlQuery } from 'querystring';
+
+export type IParams = ParsedUrlQuery & {
+  slug: string;
+};
+```
+
+- Now we can re-use this type again if we create dynamic routes for other pieces of content
+
+When it comes to querying posts by their category, that's where things get tricky. Ideally, we would do something like this:
+
+```ts
+query SingleBlogPostQuery($slug: String!) {
+  blogPostCollection(order: [datePublished_DESC]) {
+    items {
+      categoriesCollection(where: {slug: $slug}) {
+        items {
+          sys {
+            id
+          }
+          name
+          slug
+        }
+      }
+      content
+      image {
+        ...ImageFields
+      }
+      previewText
+      slug
+      sys {
+        id
+      }
+      title
+    }
+  }
+}
+```
+
+Where we filter posts by the nested `categoriesCollection`. However, this is not possible because categoriesCollection is an object, and the `where` filter can only be used on arrays. So, what do we do here?
+
+Instead, we want to query for all `categories` of the matching slug, then find any BlogPosts that are linked to that matching category.
+
+The query looks like this:
+
+```ts
+body: JSON.stringify({
+  query: gql`
+    query PostByCategoryQuery($slug: String!) {
+      categoryCollection(where: { slug: $slug }) {
+        items {
+          linkedFrom {
+            blogPostCollection {
+              items {
+                previewText
+                slug
+                sys {
+                  id
+                }
+                title
+              }
+            }
+          }
+          name
+        }
+      }
+    }
+  `,
+  variables: {
+    slug
+  }
+});
+```
+
+The type for this also looks pretty crazy:
+
+```ts
+type PropsGraphQLResponse = {
+  data: {
+    categoryCollection: {
+      items: {
+        linkedFrom: {
+          blogPostCollection: {
+            items: ContentfulBlogPost[];
+          };
+        };
+        name: string;
+      }[];
+    };
+  };
+};
+```
+
+So, the `getStaticPaths()` looks like this in the end:
+
+```ts
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  // get contentful data
+  const { slug } = params as IParams;
+
+  // get contentful data
+  const response = await fetch();
+  // ... query here
+
+  const { data }: PropsGraphQLResponse = await response.json();
+
+  const blogPostData = data.categoryCollection.items;
+
+  return {
+    props: {
+      blogPostData
+    }
+  };
+};
+```
+
+Now we can setup the type for the `blogPostData` prop:
+
+```ts
+type CategoryPageProps = {
+  blogPostData: {
+    linkedFrom: {
+      blogPostCollection: {
+        items: ContentfulBlogPost[];
+      };
+    };
+    name: string;
+  }[];
+};
+```
+
+We can update the component to this:
+
+```ts
+const CategoryPage: NextPage<CategoryPageProps> = ({ blogPostData }) => {
+  console.log('blogPostData: ', blogPostData);
+
+  return (
+    // some jsx here
+  );
+};
+```
+
+When we check the `console.log()` to view `blogPostData`, we can see there is an array with a single object in it. Like we did before, we can destructure this one object out of the array like so:
+
+```ts
+const [data] = blogPostData;
+```
+
+Now we can access `data.name`, and `data.linkedFrom` much more easily.
+
+We'll display a basic heading mentioning which `category` you are viewing, and display just the post `title` for now:
+
+```ts
+const CategoryPage: NextPage<CategoryPageProps> = ({ blogPostData }) => {
+  // destructure the one item out of blogPostData array
+  const [data] = blogPostData;
+
+  return (
+    <>
+      {/* dyanmic head for seo */}
+      <Head>
+        <title>{data.name} | Next.js Contentful Blog</title>
+        <meta name='description' content={data.name} />
+      </Head>
+
+      <h1>Category Page for {data.name}</h1>
+
+      <div className='grid'>
+        {data.linkedFrom.blogPostCollection.items.map((post) => (
+          <h3 key={post.title}>{post.title}</h3>
+        ))}
+      </div>
+    </>
+  );
+};
+```
+
+You may have noticed that our query for the BlogPosts is a lot smaller than on the home page. This is due to [GraphQL Query Complexity Limits](https://www.contentful.com/developers/docs/references/graphql/#/introduction/query-complexity-limits). We can only query for those fields. So, we need to create a simpler version of how the BlogPost cards are displayed.
+
+This means first, we'll want to abstract the MainHeading styled component into a reusable global UI component:
+
+```ts
+// components/UI/MainHeading.ts
+
+import styled from 'styled-components';
+
+export const MainHeading = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes.heading.large};
+  margin: 3.5% 0 0 5%;
+`;
+```
+
+## Creating & Displaying Related Posts
+
+Most blogs have a Related Posts or similarly named section underneath the post.
+
+We can leverage our Categories to only show related posts with the same categories.
+
+- In `pages/blog/[slug].tsx`
 
 ## Host on Vercel
 
