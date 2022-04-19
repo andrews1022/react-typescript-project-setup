@@ -851,61 +851,11 @@ const GlobalStyle = createGlobalStyle``;
 export default GlobalStyle;
 ```
 
-- Inside the backticks is where you can place your global styles you want applied. Let's copy and paste some from global.css into there and make the necessary adjustments:
+- Inside the backticks is where you can place your global styles you want applied. Copy and paste [this code](https://gist.github.com/andrews1022/96c86f6aaa1a12d1332317dffff208f8) into the file.
 
-```javascript
-const GlobalStyle = createGlobalStyle`
-  html {
-    scroll-behavior: smooth;
-  }
+Next, let's create the global `theme` object
 
-  html * {
-    box-sizing: border-box;
-  }
-
-  body {
-    background: #fff;
-    color: #000;
-    font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    margin: 0;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-  }
-`;
-```
-
-Next, let's create the global theme object
-
-- Inside the styles folder, create a new file called theme.ts, and added this code to start:
-
-```javascript
-const theme = {
-  mediaQueries: {
-    desktopHD: 'only screen and (max-width: 1920px)',
-    desktopMedium: 'only screen and (max-width: 1680px)',
-    desktopSmall: 'only screen and (max-width: 1440px)',
-    laptop: 'only screen and (max-width: 1366px)',
-    laptopSmall: 'only screen and (max-width: 1280px)',
-    tabletLandscape: 'only screen and (max-width: 1024px)',
-    tabletMedium: 'only screen and (max-width: 900px)',
-    tabletPortrait: 'only screen and (max-width: 768px)',
-    mobileXLarge: 'only screen and (max-width: 640px)',
-    mobileLarge: 'only screen and (max-width: 576px)',
-    mobileMedium: 'only screen and (max-width: 480px)',
-    mobileSmall: 'only screen and (max-width: 415px)',
-    mobileXSmall: 'only screen and (max-width: 375px)',
-    mobileTiny: 'only screen and (max-width: 325px)'
-  },
-  colors: {
-    red: 'red'
-  }
-};
-
-export default theme;
-```
+- Inside the styles folder, create a new file called theme.ts, and added [this code](https://gist.github.com/andrews1022/051e113b6ff46a7252bcac1d3b9045fb)
 
 Now, let's use both of them. To do so, open the `Layout` component file (`src/components/Layout/index.tsx`)
 
