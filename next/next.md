@@ -18,7 +18,7 @@ This is my personal approach for getting a Next.js project up an running using T
 - Answer the questions accordingly, and select yes to install any peer dependencies
 - Once done, open `.eslintrc.json`
   - ESLint may not be applying yet, so might have to close and reopen in VS Code
-  - Get rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/blob/main/rules/create-react-app.json)
+  - Get rules from [here](https://github.com/andrews1022/eslint-react-quick-setup/tree/main/rules)
   - Make sure to add `"plugin:@typescript-eslint/recommended"` to `"extends"` array
 - You can add on these 2 rules if you are using React v17 or later:
 
